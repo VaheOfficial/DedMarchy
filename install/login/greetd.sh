@@ -82,7 +82,7 @@ if ! id greeter &>/dev/null; then
 fi
 
 # Greeter user needs video + input access for Hyprland
-sudo usermod -aG video,input greeter 2>/dev/null || true
+sudo usermod -aG video,input,render greeter 2>/dev/null || true
 
 # Ensure greeter user can read the greeter files and write to its runtime
 sudo chown -R greeter:greeter /opt/dedsec 2>/dev/null || true

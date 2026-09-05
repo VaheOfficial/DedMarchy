@@ -16,7 +16,7 @@ sudo ln -sf ../Common /opt/dedsec/Bar/Common
 if ! id greeter &>/dev/null; then
   sudo useradd -r -s /bin/bash -d /opt/dedsec greeter 2>/dev/null || true
 fi
-sudo usermod -aG video,input greeter 2>/dev/null || true
+sudo usermod -aG video,input,render greeter 2>/dev/null || true
 sudo chown -R greeter:greeter /opt/dedsec 2>/dev/null || true
 sudo chmod -R 755 /opt/dedsec 2>/dev/null || true
 

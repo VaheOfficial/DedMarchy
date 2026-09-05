@@ -10,6 +10,9 @@ sudo rm -f /opt/dedsec/Greeter/Common /opt/dedsec/Bar/Common
 sudo ln -sf ../Common /opt/dedsec/Greeter/Common
 sudo ln -sf ../Common /opt/dedsec/Bar/Common
 
+# The greeter user needs video, input, and the GPU render node
+sudo usermod -aG video,input,render greeter 2>/dev/null || true
+
 sudo chown -R greeter:greeter /opt/dedsec 2>/dev/null || true
 sudo chmod -R 755 /opt/dedsec 2>/dev/null || true
 

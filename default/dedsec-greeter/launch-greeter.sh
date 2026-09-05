@@ -12,7 +12,7 @@ log="/tmp/dedsec-greeter-${USER:-$(id -un)}.log"
 
 launch() {
   echo "[$(date '+%F %T')] starting quickshell mode=$mode ${LIBGL_ALWAYS_SOFTWARE:+(software rendering)}" >>"$log"
-  DEDSEC_MODE="$mode" quickshell --path /opt/dedsec/Greeter >>"$log" 2>&1
+  QT_QPA_PLATFORM=wayland DEDSEC_MODE="$mode" quickshell --path /opt/dedsec/Greeter >>"$log" 2>&1
 }
 
 started=$(date +%s)
