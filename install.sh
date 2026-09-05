@@ -48,6 +48,17 @@ for arg in "$@"; do
   esac
 done
 
+# Ask for sudo once and keep the credential cache warm for the whole install
+if [[ -z ${OMARCHY_CHROOT_INSTALL:-} ]]; then
+  sudo -v
+  (
+    while kill -0 "$$" 2>/dev/null; do
+      sudo -n true 2>/dev/null
+      sleep 50
+    done
+  ) &
+fi
+
 # Install
 source "$OMARCHY_INSTALL/helpers/all.sh"
 source "$OMARCHY_INSTALL/preflight/all.sh"
