@@ -15,6 +15,13 @@ launch() {
   QT_QPA_PLATFORM=wayland DEDSEC_MODE="$mode" quickshell --path /opt/dedsec/Greeter >>"$log" 2>&1
 }
 
+# VMware and VirtualBox virtual GPUs cannot give Qt a hardware GL context (the
+# lock surface dies with "invalid arguments for wl_surface.attach"), so skip the
+# failed first attempt there
+if grep -qiE 'vmware|virtualbox|innotek' /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name 2>/dev/null; then
+  export LIBGL_ALWAYS_SOFTWARE=1
+fi
+
 started=$(date +%s)
 launch
 code=$?
@@ -22,6 +29,11 @@ code=$?
 if (( code != 0 && $(date +%s) - started < 10 )); then
   echo "[$(date '+%F %T')] quickshell exited with code $code right away, retrying with software rendering" >>"$log"
   export LIBGL_ALWAYS_SOFTWARE=1
+  # A locker that died mid-lock leaves Hyprland showing its crashed-lock screen,
+  # which blocks a new lock until it is cleared.
+  if [[ $mode == "lockd" ]]; then
+    hyprctl eval 'hl.clear_crashed_lockscreen()' >>"$log" 2>&1 || true
+  fi
   launch
   code=$?
 fi

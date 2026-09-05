@@ -79,3 +79,6 @@ linux-t2
 linux-t2-headers
 t2fanrd
 tiny-dfr
+
+# VMware guest support packages
+open-vm-tools
