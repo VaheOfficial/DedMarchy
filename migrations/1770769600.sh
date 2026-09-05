@@ -1,20 +1,13 @@
-echo "DedSecOS full UI overhaul — refresh all configs, set up EWW HUD, rofi menu, refresh Plymouth"
+echo "DedSecOS full UI overhaul — refresh all configs, set up EWW HUD, refresh Plymouth"
 
 # Install new dependencies
 omarchy-pkg-aur-add eww
-
-omarchy-pkg-add rofi
 
 # Copy EWW config
 mkdir -p ~/.config/eww
 cp -f ~/.local/share/omarchy/config/eww/eww.yuck ~/.config/eww/eww.yuck
 cp -f ~/.local/share/omarchy/config/eww/eww.scss ~/.config/eww/eww.scss
 
-# Copy rofi config
-mkdir -p ~/.config/rofi
-cp -f ~/.local/share/omarchy/config/rofi/config.rasi ~/.config/rofi/config.rasi
-cp -f ~/.local/share/omarchy/config/rofi/dedsec.rasi ~/.config/rofi/dedsec.rasi
-cp -f ~/.local/share/omarchy/config/rofi/dedsec-drun.rasi ~/.config/rofi/dedsec-drun.rasi
 
 
 # Copy updated screensaver text

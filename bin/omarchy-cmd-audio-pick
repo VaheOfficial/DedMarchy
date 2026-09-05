@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Audio device picker via rofi -- select an output device from a list.
+# omarchy:summary=Pick an audio output device from a list
+# omarchy:group=cmd
+# omarchy:name=audio-pick
 # Complements omarchy-cmd-audio-switch (which cycles) by letting you pick directly.
 
 temp_file=$(mktemp)
@@ -28,7 +30,7 @@ done < <(pactl list sinks)
 
 menu_options=$(echo -e "$menu_options" | sed '$s/.$//')
 
-choice=$(echo -e "$menu_options" | rofi -dmenu -p "Audio //" -i -theme dedsec 2>/dev/null)
+choice=$(echo -e "$menu_options" | omarchy-launch-walker --dmenu --width 400 --minheight 1 --maxheight 400 -p "Audio…" 2>/dev/null)
 
 if [[ -n "$choice" ]]; then
   selected_num=$(echo "$choice" | sed 's/^\([0-9]\+\)\..*/\1/')

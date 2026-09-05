@@ -1,20 +1,11 @@
-# Always copy fresh Plymouth theme files and rebuild
+# Always copy the theme files: DedSec ships its own Plymouth theme under the
+# "omarchy" name, so an existing Omarchy install would otherwise keep the old files.
 sudo mkdir -p /usr/share/plymouth/themes/omarchy
-sudo cp -f "$HOME/.local/share/omarchy/default/plymouth"/* /usr/share/plymouth/themes/omarchy/
-sudo rm -rf /usr/share/plymouth/themes/omarchy/plymouth 2>/dev/null
+sudo cp -r "$HOME/.local/share/omarchy/default/plymouth/"* /usr/share/plymouth/themes/omarchy/
+sudo plymouth-set-default-theme omarchy
 
-# Write Plymouth config directly (plymouth-set-default-theme can silently fail)
+# Show the splash immediately instead of after the default delay
 sudo mkdir -p /etc/plymouth
-sudo tee /etc/plymouth/plymouthd.conf > /dev/null << 'EOF'
-[Daemon]
-Theme=omarchy
-ShowDelay=0
-DeviceTimeout=8
-EOF
-
-# Rebuild initramfs
-if command -v limine-mkinitcpio &>/dev/null; then
-  sudo limine-mkinitcpio
-else
-  sudo mkinitcpio -P
+if ! grep -q '^ShowDelay=' /etc/plymouth/plymouthd.conf 2>/dev/null; then
+  echo "ShowDelay=0" | sudo tee -a /etc/plymouth/plymouthd.conf >/dev/null
 fi

@@ -1,188 +1,191 @@
 @import "../omarchy/current/theme/waybar.css";
 
-/* ═══════════════════════════════════════════════════════════════
-   DedSec // DATA READOUT STRIP
-   Not a desktop bar. A system telemetry feed.
-   ═══════════════════════════════════════════════════════════════ */
-
 * {
-  background-color: transparent;
-  color: @dim;
+  background-color: @background;
+  color: @foreground;
 
   border: none;
   border-radius: 0;
   min-height: 0;
   font-family: 'JetBrainsMono Nerd Font';
-  font-size: 11px;
-  font-weight: normal;
+  font-size: 12px;
 }
-
-window#waybar {
-  background-color: @background;
-  border-bottom: 1px solid alpha(@muted, 0.35);
-}
-
-/* ── Left: Identity + Workspaces ────────────────── */
 
 .modules-left {
-  margin-left: 10px;
+  margin-left: 8px;
 }
 
-#custom-dedsec {
-  color: @accent;
-  font-weight: bold;
-  font-size: 12px;
-  letter-spacing: 2px;
-  margin-right: 6px;
-  padding: 0 4px;
-}
-
-#custom-tag-open,
-#custom-tag-close {
-  color: @muted;
-  font-size: 12px;
-  padding: 0;
-  margin: 0 1px;
+.modules-right {
+  margin-right: 8px;
 }
 
 #workspaces button {
   all: initial;
-  color: @dim;
-  background-color: transparent;
-  font-family: 'JetBrainsMono Nerd Font';
-  font-size: 11px;
-  font-weight: bold;
-  padding: 0 5px;
-  margin: 0;
-  min-width: 8px;
-  transition: none;
+  padding: 0 6px;
+  margin: 0 1.5px;
+  min-width: 9px;
 }
 
 #workspaces button.empty {
-  color: @muted;
   opacity: 0.5;
 }
 
-#workspaces button.active {
-  color: @accent;
-}
-
-#workspaces button:hover {
-  color: @foreground;
-}
-
-#custom-divider,
-#custom-divider2,
-#custom-divider3,
-#custom-divider4 {
-  color: @muted;
-  font-size: 10px;
-  margin: 0 8px;
-  opacity: 0.5;
-}
-
-#window {
-  color: @dim;
-  font-size: 10px;
-  font-style: italic;
-  margin-left: 2px;
-}
-
-/* ── Center: Status indicators ──────────────────── */
-
+#cpu,
+#memory,
+#battery,
+#pulseaudio,
+#custom-omarchy,
 #custom-update {
-  color: @accent;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
-
-#custom-screenrecording-indicator {
   min-width: 12px;
-  margin: 0 4px;
-  font-size: 10px;
-}
-
-#custom-screenrecording-indicator.active {
-  color: @alert;
-}
-
-#custom-voxtype {
-  min-width: 12px;
-  margin: 0 4px;
-}
-
-#custom-voxtype.recording {
-  color: @alert;
-  font-weight: bold;
-}
-
-/* ── Right: System telemetry ────────────────────── */
-
-.modules-right {
-  margin-right: 10px;
-}
-
-#network {
-  color: @foreground;
-  margin: 0 4px;
-}
-
-#pulseaudio {
-  margin: 0 4px;
-}
-
-#cpu {
-  color: @cyan;
-  margin: 0 4px;
-}
-
-#memory {
-  color: @cyan;
-  margin: 0 4px;
-}
-
-#battery {
-  color: @foreground;
-  margin: 0 4px;
-}
-
-#battery.warning {
-  color: #BFFF00;
-}
-
-#battery.critical {
-  color: @alert;
-}
-
-#clock {
-  color: @accent;
-  font-weight: bold;
-  font-size: 12px;
-  margin: 0 4px;
-  letter-spacing: 1px;
+  margin: 0 7.5px;
 }
 
 #tray {
-  margin-left: 8px;
-  margin-right: 4px;
+  margin-right: 16px;
+}
+
+#bluetooth {
+  margin-right: 17px;
+}
+
+#network {
+  margin-right: 13px;
 }
 
 #custom-expand-icon {
-  margin-right: 8px;
+  margin-right: 18px;
+}
+
+tooltip {
+  padding: 2px;
+}
+
+#custom-update {
+  font-size: 10px;
+}
+
+#clock {
+  margin-left: 8.75px;
+}
+
+#custom-weather {
+  margin-left: 7.5px;
+  margin-right: 7.5px;
+  min-width: 14px;
+}
+
+#custom-weather.unavailable {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
 }
 
 .hidden {
   opacity: 0;
 }
 
-/* ── Tooltips ───────────────────────────────────── */
+#custom-screenrecording-indicator,
+#custom-idle-indicator,
+#custom-notification-silencing-indicator {
+  min-width: 12px;
+  margin-left: 5px;
+  margin-right: 0;
+  font-size: 10px;
+  padding-bottom: 1px;
+}
 
-tooltip {
-  padding: 6px 10px;
-  background-color: @surface;
-  border: 1px solid @muted;
-  border-radius: 0;
-  color: @foreground;
-  font-size: 11px;
+#custom-screenrecording-indicator.active {
+  color: #a55555;
+}
+
+#custom-idle-indicator.active,
+#custom-notification-silencing-indicator.active {
+  color: #a55555;
+}
+
+#custom-voxtype {
+  min-width: 12px;
+  margin: 0 0 0 7.5px;
+}
+
+#custom-voxtype.recording {
+  color: #a55555;
+}
+
+.left .modules-left, .right .modules-left { margin: 8px 0 0 0; }
+.left .modules-right, .right .modules-right { margin: 0 0 8px 0; }
+
+.left #workspaces button, .right #workspaces button {
+  padding: 6px 0;
+  margin: 1.5px 0;
+}
+
+.left #cpu, .right #cpu,
+.left #memory, .right #memory,
+.left #battery, .right #battery,
+.left #pulseaudio, .right #pulseaudio,
+.left #custom-omarchy, .right #custom-omarchy,
+.left #custom-update, .right #custom-update {
+  margin: 1.5px 0;
+  padding: 6px 0;
+  min-width: 0;
+  min-height: 12px;
+}
+
+.left #tray, .right #tray { margin: 0 0 16px 0; }
+.left #bluetooth, .right #bluetooth { margin: 1.5px 0; padding: 6px 0; min-height: 12px; }
+.left #network, .right #network { margin: 1.5px 0; padding: 6px 0; min-height: 12px; }
+.left #custom-expand-icon, .right #custom-expand-icon { margin: 1.5px 0; padding: 6px 0; min-height: 12px; }
+.left #clock, .right #clock { margin: 8.75px 0 0 0; }
+.left #custom-weather, .right #custom-weather { margin: 1.5px 0; padding: 6px 0; min-height: 12px; min-width: 14px; margin-right: 4px; }
+
+.left #custom-screenrecording-indicator, .right #custom-screenrecording-indicator,
+.left #custom-idle-indicator, .right #custom-idle-indicator,
+.left #custom-notification-silencing-indicator, .right #custom-notification-silencing-indicator {
+  margin: 5px 0 0 0;
+  min-width: 0;
+  min-height: 12px;
+}
+
+.left #custom-voxtype, .right #custom-voxtype { margin: 7.5px 0 0 0; min-width: 0; min-height: 12px; }
+
+#custom-expand-icon.vertical,
+.left #custom-expand-icon.horizontal,
+.right #custom-expand-icon.horizontal {
+  opacity: 0;
+  font-size: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.left #custom-expand-icon.vertical,
+.right #custom-expand-icon.vertical {
+  opacity: 1;
+  font-size: inherit;
+  min-width: 0;
+  min-height: 12px;
+  margin: 1.5px 0;
+  padding: 6px 0;
+}
+
+#clock.vertical,
+.left #clock.horizontal,
+.right #clock.horizontal {
+  opacity: 0;
+  font-size: 0;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.left #clock.vertical,
+.right #clock.vertical {
+  opacity: 1;
+  font-size: inherit;
+  min-width: 0;
+  min-height: 12px;
+  margin: 8.75px 0 0 0;
 }

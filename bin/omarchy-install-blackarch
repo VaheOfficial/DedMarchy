@@ -18,7 +18,7 @@ if ! grep -q "\[blackarch\]" /etc/pacman.conf 2>/dev/null; then
 fi
 
 # All available BlackArch groups
-GROUPS=(
+BA_GROUPS=(
   "blackarch (ALL ~2800 tools, 50GB+)"
   "blackarch-anti-forensic"
   "blackarch-automation"
@@ -71,15 +71,15 @@ if [[ -n "$1" ]]; then
 else
   # Interactive selection
   if omarchy-cmd-present gum; then
-    selected=$(printf '%s\n' "${GROUPS[@]}" | gum choose --header "Select BlackArch group to install")
+    selected=$(printf '%s\n' "${BA_GROUPS[@]}" | gum choose --header "Select BlackArch group to install")
   else
     echo "Available groups:"
-    for i in "${!GROUPS[@]}"; do
-      echo "  $((i + 1)). ${GROUPS[$i]}"
+    for i in "${!BA_GROUPS[@]}"; do
+      echo "  $((i + 1)). ${BA_GROUPS[$i]}"
     done
     echo
     read -rp "Enter number: " num
-    selected="${GROUPS[$((num - 1))]}"
+    selected="${BA_GROUPS[$((num - 1))]}"
   fi
 fi
 

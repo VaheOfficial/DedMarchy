@@ -32,7 +32,7 @@ if [[ -z "${OMARCHY_ONLINE_INSTALL:-}" ]]; then
 fi
 
 # Strip Windows CRLF line endings from deployed files (dev environment is Windows)
-find "$OMARCHY_PATH" -type f \( -name "*.sh" -o -name "*.conf" -o -name "*.toml" -o -name "*.json" -o -name "*.jsonc" -o -name "*.packages" -o -name "*.qml" -o -name "*.css" -o -name "*.scss" -o -name "*.yuck" -o -name "qmldir" -o -name "*.rasi" \) -exec sed -i 's/\r$//' {} + 2>/dev/null || true
+find "$OMARCHY_PATH" -type f \( -name "*.sh" -o -name "*.conf" -o -name "*.lua" -o -name "*.toml" -o -name "*.json" -o -name "*.jsonc" -o -name "*.packages" -o -name "*.qml" -o -name "*.css" -o -name "*.scss" -o -name "*.yuck" -o -name "qmldir" -o -name "*.rasi" \) -exec sed -i 's/\r$//' {} + 2>/dev/null || true
 
 # Deploy-only mode: just copy files, skip full install
 if [[ "${1:-}" == "--deploy-only" || "${1:-}" == "-d" ]]; then

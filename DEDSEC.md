@@ -14,7 +14,7 @@ A Watch Dogs-inspired Linux distribution built on Arch Linux. Fork of [Omarchy](
 ### Fresh Install (from Arch)
 
 ```bash
-bash <(curl -sL https://raw.githubusercontent.com/VaheOfficial/DedMarchy/master/boot.sh)
+bash <(curl -sL https://raw.githubusercontent.com/VaheOfficial/DedMarchy/dev/boot.sh)
 ```
 
 Or clone and run locally:
@@ -48,7 +48,7 @@ cd DedMarchy
 Custom branded bootloader config. Target OS name set to "DedSec".
 
 ### Plymouth Boot Splash
-Script-based theme at `/usr/share/plymouth/themes/omarchy/`. Uses DedSec branding with `#050A0E` background and JetBrainsMono Nerd Font.
+Script-based theme at `/usr/share/plymouth/themes/omarchy/` (`default/plymouth/omarchy.script`). Built on the Omarchy boot flow (eased fake progress, drive-decryption prompt) with a DedSec console readout under the logo: six boot lines are typed out one character at a time behind a scrambling cursor, finished lines dim to the log color, the latest line keeps a blinking block cursor, and a thin neon-green progress line tracks the boot. Lines unlock as boot progress advances.
 
 ### DedSec Greeter (Login Screen)
 A full QML/Quickshell-based login and lock screen replacing SDDM. Runs via `greetd` inside a minimal Hyprland session.
@@ -71,7 +71,7 @@ A full QML/Quickshell-based login and lock screen replacing SDDM. Runs via `gree
 
 **Safety:** Falls back to SDDM if Quickshell is unavailable.
 
-**Lock screen:** Same greeter in lockd mode. Triggered by `omarchy-lock-screen` (Super+Ctrl+L). Falls back to hyprlock.
+**Lock screen:** Same greeter in lockd mode. Triggered by `omarchy-system-lock` (Super+Ctrl+L). Falls back to hyprlock.
 
 ---
 
@@ -94,16 +94,17 @@ Full 16-color ANSI palette in `themes/dedsec/colors.toml`.
 
 ### Waybar (Top Bar)
 
-Styled as a "data readout strip" -- no icons, pure text telemetry.
+The upstream Omarchy bar with DedSec accents layered on top via `themes/dedsec/waybar.css`.
 
-**Left:** `DSec` menu button | `[1 2 3 4 5]` workspaces | `// window_class`
-**Center:** Screen recording indicator | Voxtype status | Update patch indicator
-**Right:** `NET:ETH` | `VOL:85%` | `CPU:12%` | `MEM:34%` | `PWR:87%` | `14:58:03` | System tray
+**Left:** DedSec menu button (hooded-user glyph) | workspaces
+**Center:** Clock | Weather | Update indicator | Voxtype | Screen recording, idle-lock and notification-silencing indicators
+**Right:** System tray | Bluetooth | Network | Volume | CPU | Memory | Battery
 
-- `DSec` button opens the DedSec menu (or right-click for terminal)
-- Active workspace in accent green, empty workspaces dimmed
-- Dividers are subtle pipe characters
-- Clock shows seconds, alt-click for full date
+- Menu button opens the DedSec menu (right-click for a terminal)
+- Active workspace, clock, and update indicator in accent green; CPU and memory in cyan; alerts in magenta
+- Memory module is a DedSec addition, with RAM and swap in the tooltip
+- Middle-click the volume icon to pick an audio output device
+- Supports upstream's top/bottom/left/right positions (Style > Waybar)
 
 ### EWW Desktop HUD
 
@@ -120,7 +121,9 @@ Persistent fullscreen overlay (non-focusable, desktop layer) providing ambient s
 
 Config: `config/eww/eww.yuck` + `config/eww/eww.scss`
 
-### Hyprland Animations
+### Hyprland Look & Feel
+
+Hyprland is configured in Lua (upstream's format). DedSec density and motion live in `default/hypr/looknfeel.lua`; theme colors in `themes/dedsec/hyprland.lua`. User overrides go in `~/.config/hypr/*.lua`.
 
 Snappy, decisive animations. No floaty effects.
 
@@ -145,13 +148,9 @@ Snappy, decisive animations. No floaty effects.
 - Spotify notifications suppressed
 - Do-not-disturb mode supported
 
-### Rofi (Launcher/Menu)
+### Launcher (Walker)
 
-Two themes:
-- `dedsec.rasi` -- System menu (northwest-anchored, 320px, used by `omarchy-menu`)
-- `dedsec-drun.rasi` -- App launcher (centered, wider, used by Super+Space)
-
-Visual: transparent dark background, green accent, left-border highlight on selection, monospace font.
+Walker (upstream's launcher) handles the app launcher, the emoji picker, and every DedSec menu. It is themed from `colors.toml` through `default/themed/walker.css.tpl`, so it follows the DedSec palette automatically.
 
 ---
 
@@ -176,7 +175,8 @@ Visual: transparent dark background, green accent, left-border highlight on sele
 
 | Shortcut | Action |
 |----------|--------|
-| `Super + Space` | App launcher (rofi) |
+| `Super + Space` | App launcher (Walker) |
+| `Super + Ctrl + E` | Emoji picker |
 | `Super + Alt + Space` | DedSec system menu |
 | `Super + Escape` | System/power menu |
 
@@ -185,7 +185,7 @@ Visual: transparent dark background, green accent, left-border highlight on sele
 | Shortcut | Action |
 |----------|--------|
 | `Super + Shift + Space` | Toggle top bar |
-| `Super + Ctrl + Space` | Next wallpaper |
+| `Super + Ctrl + Space` | Background switcher |
 | `Super + Shift + Ctrl + Space` | Theme menu |
 | `Super + Backspace` | Toggle window transparency |
 | `Super + Shift + Backspace` | Toggle workspace gaps |
@@ -217,25 +217,29 @@ Visual: transparent dark background, green accent, left-border highlight on sele
 
 ## DedSec Menu
 
-Accessed via `Super + Alt + Space` or clicking `DSec` in the top bar. Rofi-based with nested submenus.
+Accessed via `Super + Alt + Space` or clicking the menu glyph in the top bar. Walker-based with nested submenus, following upstream's structure and naming, with DedSec additions.
 
 | Entry | Description |
 |-------|-------------|
-| **Launch** | Open app launcher (same as Super+Space) |
-| **Intel** | Documentation links (keybindings, Hyprland wiki, Arch wiki, Neovim, Bash) |
-| **Exploit** | Capture (screenshots, recording, color picker), Share, Toggle (nightlight, idle lock, top bar, Dead Signal), Hardware |
-| **Arsenal** | BlackArch tool categories -- Recon, Scanner, Exploitation, Web App, Cracker, Wireless, Sniffer, Proxy, Forensic, Social, Fuzzer |
-| **Skin** | Theme, Font, Background, Hyprland config, About |
-| **Config** | Audio, WiFi, Bluetooth, Power, Sleep, Monitors, Keybindings, Input, DNS, Security |
-| **Deploy** | Install services (JavaScript, PHP, Elixir, editors, terminals, AI, gaming) |
-| **Purge** | Remove development tools |
-| **Patch** | System updates, feed channel, config, hardware, password |
-| **Ident** | System identity/about |
-| **Shutdown** | Power menu |
+| **Apps** | Open app launcher (same as Super+Space) |
+| **Learn** | Keybindings, Tmux keybindings, DedSec docs, Omarchy manual, Hyprland, Arch, Neovim, Bash |
+| **Trigger** | Reminder, Capture (screenshot, recording, text extraction, color picker), Transcode, Share, Toggle, Hardware |
+| **Tools** | BlackArch tool categories -- Recon, Scanner, Exploitation, Web App, Cracker, Wireless, Sniffer, Proxy, Forensic, Social, Fuzzer (DedSec addition) |
+| **Style** | Theme, Unlock, Font, Background, Waybar position, Corners, Hyprland config, Screensaver, About |
+| **Setup** | Audio, WiFi, Bluetooth, Power Profile, Sleep, Monitors, Keybindings, Input, Defaults, DNS, Security, Config, Audio Device, App Visibility |
+| **Install** | Packages, AUR, web apps, TUIs, services, styles, dev environments, editors, terminals, browsers, AI, gaming, Windows VM |
+| **Remove** | Counterparts of the install menu |
+| **Update** | DedSec update, channel, config, extra themes, process restarts, hardware, firmware, password, timezone, time |
+| **About** | System identity/about |
+| **System** | Screensaver, Lock, Suspend, Hibernate, Logout, Restart, Shutdown |
 
 ---
 
 ## Terminal
+
+### Emulator
+
+Foot is the default terminal (upstream's default). Alacritty, Ghostty, and Kitty stay installable via Install > Terminal, and Setup > Defaults > Terminal switches the default.
 
 ### Shell Prompt (Starship)
 
@@ -276,12 +280,12 @@ themes/dedsec/
   colors.toml          # 16-color palette + accent/foreground/background
   backgrounds/         # Wallpapers
   btop.theme           # btop color scheme
-  hyprland.conf        # Hyprland theme overrides
+  hyprland.lua         # Hyprland theme overrides (border colors, terminal opacity)
   icons.theme          # Icon theme selection
   neovim.lua           # Neovim base16 theme
   vscode.json          # VS Code theme
   vscode-extension/    # VS Code extension for theme
-  waybar.css           # Waybar color variables
+  waybar.css           # Waybar color variables + DedSec accent rules
   preview.png          # Theme preview image
 ```
 
@@ -394,13 +398,14 @@ DedMarchy/
   config/                 # User configs (copied to ~/.config/)
     eww/                  # Desktop HUD widgets
     waybar/               # Top bar config
+    hypr/                 # User Hyprland config (Lua)
     starship.toml         # Shell prompt
     fastfetch/            # System info display
     tmux/                 # Terminal multiplexer
-    rofi/                 # Launcher/menu themes
+    foot/                 # Default terminal config
     btop/                 # System monitor
   default/
-    hypr/                 # Hyprland config (modular)
+    hypr/                 # Hyprland defaults (Lua, modular)
     mako/                 # Notification daemon
     themed/               # Template files for theming
     plymouth/             # Boot splash

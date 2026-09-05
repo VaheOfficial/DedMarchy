@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# Set the branch for Omarchy's git repository.
+# omarchy:summary=Set the branch for Omarchy's git repository.
+# omarchy:args=<master|rc|dev>
 
 if (($# == 0)); then
   echo "Usage: omarchy-branch-set [master|rc|dev]"
@@ -9,7 +10,7 @@ else
   branch="$1"
 fi
 
-if [[ "$branch" != "master" && "$branch" != "rc" && "$branch" != "dev" ]]; then
+if [[ $branch != "master" && $branch != "rc" && $branch != "dev" ]]; then
   echo "Error: Invalid branch '$branch'. Must be one of: master, rc, dev"
   exit 1
 fi

@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# Remove all TUIs installed via omarchy-tui-install.
-# Identifies TUIs by their Exec pattern (xdg-terminal-exec --app-id=TUI.).
+# omarchy:summary=Remove all TUIs installed via omarchy-tui-install.
 
 set -e
 
@@ -17,7 +16,7 @@ while IFS= read -r -d '' file; do
   fi
 done < <(find "$APP_DIR" -maxdepth 1 -name "*.desktop" -print0 2>/dev/null)
 
-if [[ ${#tui_desktop_files[@]} -eq 0 ]]; then
+if (( ${#tui_desktop_files[@]} == 0 )); then
   echo "No TUIs found."
   exit 0
 fi
