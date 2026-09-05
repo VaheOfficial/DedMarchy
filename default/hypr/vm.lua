@@ -3,9 +3,9 @@
 -- Their virtual GPUs cannot hand clients a usable hardware GL context: Qt
 -- clients such as the DedSec greeter die with "invalid arguments for
 -- wl_surface.attach", and the desktop looks unresponsive because hotkeys
--- register but nothing opens. Force Mesa software rendering and 1x scaling.
--- On VMware, also run the virtual display slightly smaller than the host
--- window so the VMware console keeps mouse focus.
+-- register but nothing opens. Force Mesa software rendering.
+-- On VMware, also offer a display mode slightly smaller than the host window
+-- (o.vm_display_mode) so the VMware console keeps mouse focus.
 -- See https://www.robwillis.info/2025/11/installing-omarchy-on-vmware-workstation/
 -- and https://github.com/omacom/omarchy/discussions/7758
 
@@ -31,27 +31,26 @@ if not (vmware or virtualbox) then
 end
 
 hl.env("LIBGL_ALWAYS_SOFTWARE", "1")
-hl.env("GDK_SCALE", "1")
 
 if not vmware then
   return
 end
 
--- Pick a mode a little smaller than the preferred one for each virtual output.
--- A specific output rule wins over the catch-all "" rule in the user's monitors.lua.
+-- Offer a mode a little smaller than the VM window for the virtual display.
+-- This only sets o.vm_display_mode; the catch-all rule in ~/.config/hypr/monitors.lua
+-- decides whether to use it, so a mode or scale set there always wins.
 local margin_width, margin_height = 20, 30
 
 for card = 0, 2 do
   for index = 1, 4 do
-    local output = "Virtual-" .. index
-    local preferred = read_first_line("/sys/class/drm/card" .. card .. "-" .. output .. "/modes")
+    local preferred = read_first_line("/sys/class/drm/card" .. card .. "-Virtual-" .. index .. "/modes")
     if preferred then
       local width, height = preferred:match("^(%d+)x(%d+)")
       if width and height then
         width = tonumber(width) - margin_width
         height = tonumber(height) - margin_height
-        if width >= 640 and height >= 480 then
-          hl.monitor({ output = output, mode = width .. "x" .. height .. "@60", position = "auto", scale = 1 })
+        if width >= 640 and height >= 480 and not o.vm_display_mode then
+          o.vm_display_mode = width .. "x" .. height .. "@60"
         end
       end
     end

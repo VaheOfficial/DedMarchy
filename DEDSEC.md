@@ -373,7 +373,7 @@ Auto-detected and configured:
 
 ### Virtual Machines
 
-VMware and VirtualBox guests are detected from DMI. Their virtual GPUs cannot give Qt a hardware GL context, so `default/hypr/vm.lua` forces Mesa software rendering (`LIBGL_ALWAYS_SOFTWARE=1`) and 1x GDK scaling for the whole session, and the greeter launcher applies the same to the login and lock screens. On VMware it also runs each virtual display 20x30 px smaller than its preferred mode so the VMware console keeps focus, and the installer adds `open-vm-tools` (`omarchy-hw-vmware`). Based on https://www.robwillis.info/2025/11/installing-omarchy-on-vmware-workstation/ and https://github.com/omacom/omarchy/discussions/7758
+VMware and VirtualBox guests are detected from DMI. Their virtual GPUs cannot give Qt a hardware GL context, so `default/hypr/vm.lua` forces Mesa software rendering (`LIBGL_ALWAYS_SOFTWARE=1`) and 1x GDK scaling for the whole session, and the greeter launcher applies the same to the login and lock screens. On VMware it also computes `o.vm_display_mode`, 20x30 px smaller than the VM window, which the default `~/.config/hypr/monitors.lua` uses so the VMware console keeps focus; a mode or scale set in that file always wins, and the installer adds `open-vm-tools` (`omarchy-hw-vmware`). Based on https://www.robwillis.info/2025/11/installing-omarchy-on-vmware-workstation/ and https://github.com/omacom/omarchy/discussions/7758
 
 ### Migrations
 

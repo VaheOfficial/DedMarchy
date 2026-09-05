@@ -16,8 +16,14 @@ local omarchy_monitor_scale = 1
 -- local omarchy_gdk_scale = 1
 -- local omarchy_monitor_scale = 1
 
+-- Inside VMware, o.vm_display_mode is a mode slightly smaller than the VM window
+-- so the VMware console keeps focus (see default/hypr/vm.lua). Replace it with a
+-- fixed mode such as "1920x1080@60" to pin the resolution; VMware resizes the
+-- preferred mode to match its window, so pick from: hyprctl monitors all
+local omarchy_monitor_mode = o.vm_display_mode or "preferred"
+
 hl.env("GDK_SCALE", tostring(omarchy_gdk_scale))
-hl.monitor({ output = "", mode = "preferred", position = "auto", scale = omarchy_monitor_scale })
+hl.monitor({ output = "", mode = omarchy_monitor_mode, position = "auto", scale = omarchy_monitor_scale })
 
 -- Portrait/rotated secondary monitor (transform: 1 = 90°, 3 = 270°)
 -- hl.monitor({ output = "DP-2", mode = "preferred", position = "auto", scale = 1, transform = 1 })
