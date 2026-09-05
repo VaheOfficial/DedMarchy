@@ -1,0 +1,19 @@
+#!/bin/bash
+
+# omarchy:summary=Reload Hyprland when VMware resizes the virtual display so the console-friendly mode follows the window
+# omarchy:hidden=true
+
+modes_file=$(ls /sys/class/drm/card*-Virtual-1/modes 2>/dev/null | head -n 1)
+[[ -n $modes_file ]] || exit 0
+
+last=$(head -n 1 "$modes_file")
+
+# vmwgfx raises a drm change event whenever the VM window is resized
+udevadm monitor --udev --subsystem-match=drm 2>/dev/null | while read -r _; do
+  sleep 1
+  current=$(head -n 1 "$modes_file")
+  if [[ $current != "$last" ]]; then
+    last=$current
+    hyprctl reload >/dev/null 2>&1
+  fi
+done
