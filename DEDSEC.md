@@ -66,7 +66,7 @@ A full QML/Quickshell-based login and lock screen replacing SDDM. Runs via `gree
 **Files:**
 - QML project: `default/dedsec-greeter/` (deployed to `/opt/dedsec/`)
 - Config: `/etc/dedsec/greeter.config.json` (auto-generated with real system info)
-- Hyprland session: `/etc/dedsec/greeter.hyprland.conf`
+- Hyprland session: `/etc/dedsec/greeter.hyprland.lua` (launched via `start-hyprland`)
 - greetd config: `/etc/greetd/config.toml`
 
 **Safety:** Falls back to SDDM if Quickshell is unavailable.

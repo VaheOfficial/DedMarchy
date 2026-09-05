@@ -13,6 +13,19 @@ sudo ln -sf ../Common /opt/dedsec/Bar/Common
 sudo chown -R greeter:greeter /opt/dedsec 2>/dev/null || true
 sudo chmod -R 755 /opt/dedsec 2>/dev/null || true
 
-# Update the greeter's minimal Hyprland config
+# Update the greeter's minimal Hyprland config (Lua, launched via start-hyprland)
 sudo mkdir -p /etc/dedsec
-sudo cp -f ~/.local/share/omarchy/default/dedsec-greeter/Greeter/examples/greeter.hyprland.conf /etc/dedsec/
+sudo cp -f ~/.local/share/omarchy/default/dedsec-greeter/Greeter/examples/greeter.hyprland.lua /etc/dedsec/
+sudo chmod 644 /etc/dedsec/greeter.hyprland.lua
+sudo rm -f /etc/dedsec/greeter.hyprland.conf
+
+# Make sure greetd launches the greeter compositor through start-hyprland
+sudo mkdir -p /etc/greetd
+sudo tee /etc/greetd/config.toml > /dev/null << 'EOF'
+[terminal]
+vt = 1
+
+[default_session]
+command = "start-hyprland -- --config /etc/dedsec/greeter.hyprland.lua"
+user = "greeter"
+EOF

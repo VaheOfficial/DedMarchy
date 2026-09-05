@@ -61,8 +61,9 @@ if [[ ! -f /etc/dedsec/greeter.config.json ]]; then
 EOF
 fi
 
-# Copy minimal Hyprland config for greeter session
-sudo cp -f "$HOME/.local/share/omarchy/default/dedsec-greeter/Greeter/examples/greeter.hyprland.conf" /etc/dedsec/
+# Copy minimal Hyprland config for greeter session (Lua, launched via start-hyprland)
+sudo cp -f "$HOME/.local/share/omarchy/default/dedsec-greeter/Greeter/examples/greeter.hyprland.lua" /etc/dedsec/
+sudo rm -f /etc/dedsec/greeter.hyprland.conf
 
 # Configure greetd -- greeter runs inside a minimal Hyprland session
 sudo mkdir -p /etc/greetd
@@ -71,7 +72,7 @@ sudo tee /etc/greetd/config.toml > /dev/null << 'EOF'
 vt = 1
 
 [default_session]
-command = "Hyprland --config /etc/dedsec/greeter.hyprland.conf"
+command = "start-hyprland -- --config /etc/dedsec/greeter.hyprland.lua"
 user = "greeter"
 EOF
 
@@ -89,7 +90,7 @@ sudo chmod -R 755 /opt/dedsec 2>/dev/null || true
 
 # Greeter needs to read the config
 sudo chmod 644 /etc/dedsec/greeter.config.json 2>/dev/null || true
-sudo chmod 644 /etc/dedsec/greeter.hyprland.conf 2>/dev/null || true
+sudo chmod 644 /etc/dedsec/greeter.hyprland.lua 2>/dev/null || true
 
 # Disable SDDM, enable greetd
 sudo systemctl disable sddm.service 2>/dev/null || true

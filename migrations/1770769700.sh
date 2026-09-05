@@ -60,9 +60,9 @@ EOF
 fi
 
 # Copy greeter Hyprland config and set permissions
-sudo cp -f ~/.local/share/omarchy/default/dedsec-greeter/Greeter/examples/greeter.hyprland.conf /etc/dedsec/
+sudo cp -f ~/.local/share/omarchy/default/dedsec-greeter/Greeter/examples/greeter.hyprland.lua /etc/dedsec/
 sudo chmod 644 /etc/dedsec/greeter.config.json 2>/dev/null || true
-sudo chmod 644 /etc/dedsec/greeter.hyprland.conf 2>/dev/null || true
+sudo chmod 644 /etc/dedsec/greeter.hyprland.lua 2>/dev/null || true
 
 # Configure greetd
 sudo mkdir -p /etc/greetd
@@ -71,7 +71,7 @@ sudo tee /etc/greetd/config.toml > /dev/null << 'EOF'
 vt = 1
 
 [default_session]
-command = "Hyprland --config /etc/dedsec/greeter.hyprland.conf"
+command = "start-hyprland -- --config /etc/dedsec/greeter.hyprland.lua"
 user = "greeter"
 EOF
 
