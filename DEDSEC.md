@@ -69,7 +69,7 @@ A full QML/Quickshell-based login and lock screen replacing SDDM. Runs via `gree
 - Hyprland session: `/etc/dedsec/greeter.hyprland.lua` (launched via `start-hyprland`)
 - greetd config: `/etc/greetd/config.toml`
 
-**Safety:** Falls back to SDDM if Quickshell is unavailable.
+**Safety:** Falls back to SDDM if Quickshell is unavailable. The greeter is started through `/opt/dedsec/launch-greeter.sh`, which logs Quickshell output to `/tmp/dedsec-greeter-<user>.log` and retries with software rendering if Quickshell exits immediately (virtual GPUs).
 
 **Lock screen:** Same greeter in lockd mode. Triggered by `omarchy-system-lock` (Super+Ctrl+L). Falls back to hyprlock.
 

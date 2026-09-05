@@ -21,7 +21,8 @@ hl.config({
   },
 })
 
--- Launch the DedSec greeter in greetd mode once the compositor is up
+-- Launch the DedSec greeter once the compositor is up.
+-- The launcher logs to /tmp/dedsec-greeter-greeter.log and falls back to software rendering.
 hl.on("hyprland.start", function()
-  hl.exec_cmd("env DEDSEC_MODE=greetd quickshell --path /opt/dedsec/Greeter")
+  hl.exec_cmd("bash /opt/dedsec/launch-greeter.sh greetd")
 end)

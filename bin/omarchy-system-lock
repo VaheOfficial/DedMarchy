@@ -23,7 +23,7 @@ lock_running() {
 if ! lock_running; then
   (
     if [[ $LOCKER == "lockd" ]]; then
-      DEDSEC_MODE=lockd quickshell --path /opt/dedsec/Greeter
+      bash /opt/dedsec/launch-greeter.sh lockd
     else
       hyprlock
     fi
