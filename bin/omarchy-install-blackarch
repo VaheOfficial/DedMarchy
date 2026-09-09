@@ -95,7 +95,8 @@ echo ""
 echo "Installing $group_name..."
 echo ""
 
-sudo pacman -S --noconfirm --needed --overwrite '*' "$group_name"
+source "$OMARCHY_PATH/dedsec/blackarch-lib.sh"
+blackarch_install_group "$group_name"
 
 echo ""
 echo "Done. $group_name tools installed."

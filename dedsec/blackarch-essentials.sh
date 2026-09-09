@@ -18,12 +18,12 @@ BLACKARCH_GROUPS=(
   blackarch-fuzzer
 )
 
+source "$OMARCHY_PATH/dedsec/blackarch-lib.sh"
+
 for group in "${BLACKARCH_GROUPS[@]}"; do
   echo
   echo ">> Installing $group..."
-  sudo pacman -S --noconfirm --needed --overwrite '*' --ask 4 "$group" || {
-    echo ">> Some packages in $group failed to install (dependency conflicts). Skipping broken ones."
-  }
+  blackarch_install_group "$group"
 done
 
 echo
