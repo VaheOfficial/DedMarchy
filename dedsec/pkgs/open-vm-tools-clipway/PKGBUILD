@@ -12,15 +12,17 @@
 pkgname=open-vm-tools
 epoch=6
 pkgver=13.1.0
-pkgrel=3.1
+pkgrel=3.2
 pkgdesc='The Open Virtual Machine Tools (open-vm-tools) with the clipway Wayland clipboard backend'
 arch=('x86_64')
 url='https://github.com/vmware/open-vm-tools'
 license=('LGPL-2.1-only')
+# gtkmm-4.0 is a hard dependency here: 13.1.0's configure wants it, and the
+# dndcp plugin that carries the clipway clipboard backend links against it.
 depends=('fuse3' 'icu' 'iproute2' 'libdnet' 'libmspack' 'libsigc++'
          'libxss' 'lsb-release' 'procps-ng'
-         'uriparser' 'which' 'xmlsec' 'wl-clipboard')
-makedepends=('git' 'chrpath' 'doxygen' 'gtkmm3' 'libxtst' 'python' 'rpcsvc-proto' 'glib2-devel')
+         'uriparser' 'which' 'xmlsec' 'wl-clipboard' 'gtkmm-4.0' 'libxtst')
+makedepends=('git' 'chrpath' 'doxygen' 'gtkmm3' 'python' 'rpcsvc-proto' 'glib2-devel')
 optdepends=('gtkmm3: DnD/CP plugin'
             'libxtst: DnD/CP, resolution set plugins'
             'netctl: suspend-resume network state'
