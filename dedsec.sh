@@ -29,11 +29,10 @@ echo -e "\e[32mDedSec: fetching $DEDSEC_REPO ($DEDSEC_REF) into $DEDSEC_CHECKOUT
 if [[ -d $DEDSEC_CHECKOUT/.git ]]; then
   git -C "$DEDSEC_CHECKOUT" fetch -q origin "$DEDSEC_REF"
   git -C "$DEDSEC_CHECKOUT" checkout -q "$DEDSEC_REF"
-  git -C "$DEDSEC_CHECKOUT" pull -q --ff-only
+  git -C "$DEDSEC_CHECKOUT" pull -q --ff-only --no-rebase origin "$DEDSEC_REF"
 else
   git clone -q --branch "$DEDSEC_REF" "https://github.com/$DEDSEC_REPO.git" "$DEDSEC_CHECKOUT"
 fi
-chmod +x "$DEDSEC_CHECKOUT"/bin/* "$DEDSEC_CHECKOUT"/dedsec/*.sh "$DEDSEC_CHECKOUT"/dedsec.sh 2>/dev/null || true
 
 echo -e "\e[32mDedSec: linking Omarchy to the checkout\e[0m"
 "$DEDSEC_CHECKOUT/bin/omarchy-dev-link" "$DEDSEC_CHECKOUT" --no-reboot
