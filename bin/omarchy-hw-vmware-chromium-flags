@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# omarchy:summary=Add the flag Chromium browsers need to use VMware's virtual GPU to the given flags files (no-op elsewhere)
+# omarchy:hidden=true
+
+# Chromium keeps VMware's SVGA adapter on its GPU blocklist, so without this
+# every Chromium-based browser composites and rasterizes on the CPU inside a
+# VMware guest, which shows as stuttering page animations. With the patched
+# Hyprland the virtual GPU works fine for it. Called for each flags file
+# Omarchy writes, and by dedsec/vmware.sh for the ones already present.
+
+omarchy-hw-vmware || exit 0
+
+flag="--ignore-gpu-blocklist"
+
+files=("$@")
+if (( ${#files[@]} == 0 )); then
+  files=(~/.config/chromium-flags.conf ~/.config/chrome-flags.conf ~/.config/brave-flags.conf
+    ~/.config/brave-origin-flags.conf ~/.config/microsoft-edge-stable-flags.conf)
+fi
+
+for file in "${files[@]}"; do
+  [[ -f $file ]] || continue
+  grep -qx -- "$flag" "$file" || echo "$flag" >>"$file"
+done

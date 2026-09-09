@@ -54,6 +54,7 @@ With "Accelerate 3D graphics" on, VMware's virtual GPU gives the guest a real re
 - `open-vm-tools` rebuilt from Arch's recipe with clipway, `dedsec/pkgs/open-vm-tools-clipway/`: a Wayland clipboard backend for the copy/paste plugin, driven through `wl-copy` and `wl-paste`. Text only, both directions. `omarchy-launch-vmware-user` runs the user daemon inside the session.
 - `omarchy-hw-vmware-display-watch` sets the size VMware asks for whenever the VM window is resized, so the guest resolution follows. The virtual display advertises 60 Hz only, but the driver takes any rate in a custom mode: write the rate to `~/.config/omarchy/vmware-refresh` (for example `120`) and the watcher requests it. Frames only reach the window faster when the `.vmx` also lifts VMware's own caps: `mks.updateCoalescePeriodUS = "0"` (it otherwise coalesces guest updates every 16666 us), and `mks.maxRefreshRate`, `mks.lowCompositingFPS`, and `mks.maxCompositingFPS` at the monitor's rate. `OmarchySetup.ps1` writes all four; verified at 240 Hz on a 240 Hz monitor.
 - Shared folders from the VM settings mount at `/mnt/hgfs`.
+- Chromium browsers get `--ignore-gpu-blocklist`: Chromium blocklists VMware's GPU and would otherwise composite on the CPU (Brave showed "Software only" for everything). Applied to existing flags files by the setup and by Omarchy's browser install and refresh commands.
 
 No `LIBGL_ALWAYS_SOFTWARE` on VMware: mixing a software compositor with the virtual GPU is what wedged it before.
 
@@ -155,6 +156,7 @@ Started with the session from `default/hypr/autostart.lua` when eww is installed
 | `omarchy-hw-vm`, `omarchy-hw-vmware`, `omarchy-hw-hyperv` | VM detection helpers |
 | `omarchy-hw-vmware-display-watch` | Reload Hyprland when the VMware window is resized |
 | `omarchy-launch-vmware-user` | VMware user daemon inside the session, for the host clipboard |
+| `omarchy-hw-vmware-chromium-flags` | Add `--ignore-gpu-blocklist` to Chromium browser flags on VMware, where Chromium otherwise renders on the CPU |
 | `omarchy-launch-hyperv-rdp` | Start the Enhanced Session RDP server with the session (no-op elsewhere) |
 | `omarchy-dev-generate-logos` | Regenerate branding assets |
 

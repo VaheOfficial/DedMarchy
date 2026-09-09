@@ -68,6 +68,14 @@ build_recipe hyprland-vmwgfx hyprland
 build_recipe open-vm-tools-clipway open-vm-tools || omarchy-pkg-add open-vm-tools
 sudo systemctl enable --now vmtoolsd.service vmware-vmblock-fuse.service
 
+# Chromium browsers blocklist VMware's GPU and fall back to CPU rendering
+omarchy-hw-vmware-chromium-flags
+
+# Refresh rate the display watcher requests. 120 is what the virtual GPU
+# sustains with DedSec's blur and shadows; the .vmx caps must allow it too.
+mkdir -p ~/.config/omarchy
+[[ -f ~/.config/omarchy/vmware-refresh ]] || echo 120 >~/.config/omarchy/vmware-refresh
+
 # Shared folders from the VM settings appear under /mnt/hgfs
 sudo mkdir -p /mnt/hgfs
 if ! grep -q "vmhgfs-fuse" /etc/fstab; then

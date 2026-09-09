@@ -14,6 +14,7 @@ fi
 
 # Refresh the Chromium configuration
 omarchy-refresh-config chromium-flags.conf
+omarchy-hw-vmware-chromium-flags "$CONFIG_FILE"
 
 # Install/refresh the native messaging hosts used by the bundled extensions
 omarchy-install-chromium-copy-url
