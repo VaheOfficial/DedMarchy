@@ -24,7 +24,15 @@ apply() {
   hyprctl eval "hl.monitor({ output = \"Virtual-1\", mode = \"${wanted}@60\", position = \"auto\", scale = ${scale:-1} })" >/dev/null 2>&1
 }
 
+# Apply only once the requested size has held still for a poll: while the window
+# is being dragged the size changes every few hundred milliseconds, and each
+# intermediate mode applied makes VMware refit the window around it.
+previous=""
 while true; do
-  apply "$(head -n 1 "$modes_file")"
-  sleep 2
+  current=$(head -n 1 "$modes_file")
+  if [[ $current == "$previous" ]]; then
+    apply "$current"
+  fi
+  previous=$current
+  sleep 1
 done
