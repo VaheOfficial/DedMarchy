@@ -14,6 +14,10 @@ udevadm monitor --udev --subsystem-match=drm 2>/dev/null | while read -r _; do
   current=$(head -n 1 "$modes_file")
   if [[ $current != "$last" ]]; then
     last=$current
+    # VMware sometimes echoes the guest's current mode back as a request. Reloading
+    # on that would shrink the display by another margin, so only act on real changes.
+    active=$(hyprctl -j monitors 2>/dev/null | jq -r '.[0] | "\(.width)x\(.height)"' 2>/dev/null)
+    [[ $current == "$active" ]] && continue
     hyprctl reload >/dev/null 2>&1
   fi
 done
