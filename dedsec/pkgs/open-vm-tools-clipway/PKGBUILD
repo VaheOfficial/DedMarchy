@@ -12,17 +12,20 @@
 pkgname=open-vm-tools
 epoch=6
 pkgver=13.1.0
-pkgrel=3.2
+pkgrel=3.3
 pkgdesc='The Open Virtual Machine Tools (open-vm-tools) with the clipway Wayland clipboard backend'
 arch=('x86_64')
 url='https://github.com/vmware/open-vm-tools'
 license=('LGPL-2.1-only')
-# gtkmm-4.0 is a hard dependency here: 13.1.0's configure wants it, and the
-# dndcp plugin that carries the clipway clipboard backend links against it.
+# The dndcp plugin that carries the clipway clipboard backend is built against
+# gtkmm3, so that is a runtime dependency here rather than optional. 13.1.0's
+# configure looks for gtkmm4 first and has to be told not to: its GTK 4 path
+# pulls in libsigc++ 3, which dropped the signal<R, T...> syntax the plugin's
+# own headers still use.
 depends=('fuse3' 'icu' 'iproute2' 'libdnet' 'libmspack' 'libsigc++'
          'libxss' 'lsb-release' 'procps-ng'
-         'uriparser' 'which' 'xmlsec' 'wl-clipboard' 'gtkmm-4.0' 'libxtst')
-makedepends=('git' 'chrpath' 'doxygen' 'gtkmm3' 'python' 'rpcsvc-proto' 'glib2-devel')
+         'uriparser' 'which' 'xmlsec' 'wl-clipboard' 'gtkmm3' 'libxtst')
+makedepends=('git' 'chrpath' 'doxygen' 'python' 'rpcsvc-proto' 'glib2-devel')
 optdepends=('gtkmm3: DnD/CP plugin'
             'libxtst: DnD/CP, resolution set plugins'
             'netctl: suspend-resume network state'
@@ -60,7 +63,8 @@ build() {
     --sbindir=/usr/bin \
     --sysconfdir=/etc \
     --with-udev-rules-dir=/usr/lib/udev/rules.d \
-    --without-kernel-modules
+    --without-kernel-modules \
+    --without-gtkmm4
   make
 }
 
