@@ -9,7 +9,7 @@
 pkgname=lamco-rdp-server-vsock
 _pkgname=lamco-rdp-server
 pkgver=1.4.5
-pkgrel=1
+pkgrel=2
 pkgdesc="Native Wayland RDP server for Hyprland and friends, built with the AF_VSOCK transport for Hyper-V Enhanced Session Mode"
 arch=('x86_64' 'aarch64')
 url="https://github.com/lamco-admin/lamco-rdp-server"
@@ -43,7 +43,6 @@ optdepends=(
 # makepkg's LTO injects -flto=auto into CFLAGS; GCC LTO bitcode in native
 # C libraries (aws-lc-sys, ring, opus) is invisible to the Rust linker.
 options=(!lto)
-backup=('etc/dbus-1/system.d/io.lamco.RdpServer.System.conf')
 install=$pkgname.install
 source=("$_pkgname-$pkgver.tar.xz::https://github.com/lamco-admin/$_pkgname/releases/download/v$pkgver/$_pkgname-$pkgver.tar.xz"
         "cros-libva-vp9-compat.patch")
@@ -93,9 +92,9 @@ package() {
     install -Dm644 packaging/dbus/io.lamco.RdpServer.service \
         "$pkgdir/usr/share/dbus-1/services/io.lamco.RdpServer.service"
 
-    # D-Bus system bus policy
-    install -Dm644 packaging/dbus/io.lamco.RdpServer.System.conf \
-        "$pkgdir/etc/dbus-1/system.d/io.lamco.RdpServer.System.conf"
+    # The upstream system-bus policy is not installed: it names a lamco-rdp
+    # service user for an optional root-level mode this package does not ship,
+    # and dbus-broker logs "Invalid user-name" on every reload without it.
 
     # Polkit policy
     install -Dm644 packaging/polkit/io.lamco.RdpServer.policy \
