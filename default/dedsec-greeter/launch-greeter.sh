@@ -15,10 +15,10 @@ launch() {
   QT_QPA_PLATFORM=wayland DEDSEC_MODE="$mode" quickshell --path /opt/dedsec/Greeter >>"$log" 2>&1
 }
 
-# VMware and VirtualBox virtual GPUs cannot give Qt a hardware GL context (the
-# lock surface dies with "invalid arguments for wl_surface.attach"), so skip the
-# failed first attempt there
-if grep -qiE 'vmware|virtualbox|innotek' /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name 2>/dev/null; then
+# VM virtual GPUs cannot give Qt a hardware GL context (the lock surface dies
+# with "invalid arguments for wl_surface.attach"), so skip the failed first
+# attempt on VMware, VirtualBox, and Hyper-V
+if grep -qiE 'vmware|virtualbox|innotek|microsoft corporation' /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name 2>/dev/null; then
   export LIBGL_ALWAYS_SOFTWARE=1
 fi
 

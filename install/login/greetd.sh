@@ -67,12 +67,18 @@ sudo rm -f /etc/dedsec/greeter.hyprland.conf
 
 # Configure greetd -- greeter runs inside a minimal Hyprland session
 sudo mkdir -p /etc/greetd
-sudo tee /etc/greetd/config.toml > /dev/null << 'EOF'
+# The greeter compositor renders on the CPU inside VMs (see install/config/hardware/vm.sh)
+greeter_launch="start-hyprland -- --config /etc/dedsec/greeter.hyprland.lua"
+if omarchy-hw-vm; then
+  greeter_launch="env LIBGL_ALWAYS_SOFTWARE=1 $greeter_launch"
+fi
+
+sudo tee /etc/greetd/config.toml > /dev/null << EOF
 [terminal]
 vt = 1
 
 [default_session]
-command = "start-hyprland -- --config /etc/dedsec/greeter.hyprland.lua"
+command = "$greeter_launch"
 user = "greeter"
 EOF
 

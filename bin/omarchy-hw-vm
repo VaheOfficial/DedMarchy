@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# omarchy:summary=Detect whether the system is a VM guest without usable hardware GL (VMware, VirtualBox, Hyper-V)
+
+if command -v systemd-detect-virt &>/dev/null; then
+  case "$(systemd-detect-virt --vm 2>/dev/null)" in
+  vmware | oracle | microsoft) exit 0 ;;
+  esac
+fi
+
+grep -qiE 'vmware|virtualbox|innotek|microsoft corporation' /sys/class/dmi/id/sys_vendor /sys/class/dmi/id/product_name 2>/dev/null

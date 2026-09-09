@@ -1,4 +1,4 @@
--- Virtual machine tweaks, applied only inside VMware or VirtualBox guests.
+-- Virtual machine tweaks, applied only inside VMware, VirtualBox, or Hyper-V guests.
 --
 -- Their virtual GPUs cannot hand clients a usable hardware GL context: Qt
 -- clients such as the DedSec greeter die with "invalid arguments for
@@ -25,8 +25,9 @@ local dmi = vendor .. " " .. product
 
 local vmware = dmi:find("VMware") ~= nil
 local virtualbox = dmi:find("VirtualBox") ~= nil or dmi:find("innotek") ~= nil
+local hyperv = dmi:find("Microsoft Corporation") ~= nil
 
-if not (vmware or virtualbox) then
+if not (vmware or virtualbox or hyperv) then
   return
 end
 
