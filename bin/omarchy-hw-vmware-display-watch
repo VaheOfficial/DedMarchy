@@ -1,23 +1,29 @@
 #!/bin/bash
 
-# omarchy:summary=Reload Hyprland when VMware resizes the virtual display so the console-friendly mode follows the window
+# omarchy:summary=Follow VMware window resizes: apply the size the host asks for to the virtual display
 # omarchy:hidden=true
 
 modes_file=$(ls /sys/class/drm/card*-Virtual-1/modes 2>/dev/null | head -n 1)
 [[ -n $modes_file ]] || exit 0
 
-last=$(head -n 1 "$modes_file")
+# One watcher per session, however many times the config reloads
+exec 9>"${XDG_RUNTIME_DIR:-/tmp}/omarchy-vmware-display-watch.lock"
+flock -n 9 || exit 0
 
-# vmwgfx raises a drm change event whenever the VM window is resized
-udevadm monitor --udev --subsystem-match=drm 2>/dev/null | while read -r _; do
-  sleep 1
-  current=$(head -n 1 "$modes_file")
-  if [[ $current != "$last" ]]; then
-    last=$current
-    # VMware sometimes echoes the guest's current mode back as a request. Reloading
-    # on that would shrink the display by another margin, so only act on real changes.
-    active=$(hyprctl -j monitors 2>/dev/null | jq -r '.[0] | "\(.width)x\(.height)"' 2>/dev/null)
-    [[ $current == "$active" ]] && continue
-    hyprctl reload >/dev/null 2>&1
-  fi
+# open-vm-tools writes the size of the VMware window to the top of the modes
+# list whenever the window is resized. Hyprland keeps the mode list it read at
+# startup, so a reload never sees the new entry and falls back to the old size.
+# Set the mode explicitly instead; vmwgfx accepts any size. Polling also puts
+# the size back after a config reload, which reverts the monitor to "preferred".
+apply() {
+  local wanted=$1 active scale
+  [[ $wanted =~ ^[0-9]+x[0-9]+$ ]] || return 0
+  read -r active scale < <(hyprctl -j monitors 2>/dev/null | jq -r '.[0] | "\(.width)x\(.height) \(.scale)"' 2>/dev/null)
+  [[ -n $active && $wanted != "$active" ]] || return 0
+  hyprctl keyword monitor "Virtual-1,${wanted}@60,auto,${scale:-1}" >/dev/null 2>&1
+}
+
+while true; do
+  apply "$(head -n 1 "$modes_file")"
+  sleep 2
 done

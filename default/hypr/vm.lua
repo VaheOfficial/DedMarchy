@@ -42,8 +42,9 @@ if vmware then
   })
 
   -- Follow the VM window when it is resized, and share the host clipboard.
-  hl.exec_cmd(o.launch("omarchy-hw-vmware-display-watch"))
-  hl.exec_cmd(o.launch("omarchy-launch-vmware-user"))
+  -- Started once per session, not on every config reload.
+  o.launch_on_start("omarchy-hw-vmware-display-watch")
+  o.launch_on_start("omarchy-launch-vmware-user")
   return
 end
 
@@ -53,5 +54,5 @@ hl.env("LIBGL_ALWAYS_SOFTWARE", "1")
 -- shares this session over vsock. Set up by dedsec/hyperv.sh; the launcher
 -- is a no-op until then.
 if hyperv then
-  hl.exec_cmd(o.launch("omarchy-launch-hyperv-rdp"))
+  o.launch_on_start("omarchy-launch-hyperv-rdp")
 end
