@@ -15,13 +15,21 @@ flock -n 9 || exit 0
 # startup, so a reload never sees the new entry and falls back to the old size.
 # Set the mode explicitly instead; vmwgfx accepts any size. Polling also puts
 # the size back after a config reload, which reverts the monitor to "preferred".
+# The virtual display advertises 60 Hz only, but the driver accepts any rate in
+# a custom mode. Frames only reach the host window faster when the VM's .vmx
+# also lifts VMware's own caps (mks.updateCoalescePeriodUS, mks.maxCompositingFPS);
+# see DEDSEC.md. Put the rate to request in ~/.config/omarchy/vmware-refresh.
+rate=$(cat ~/.config/omarchy/vmware-refresh 2>/dev/null)
+[[ $rate =~ ^[0-9]+$ ]] || rate=60
+
 apply() {
-  local wanted=$1 active scale
+  local wanted=$1 active active_rate scale
   [[ $wanted =~ ^[0-9]+x[0-9]+$ ]] || return 0
-  read -r active scale < <(hyprctl -j monitors 2>/dev/null | jq -r '.[0] | "\(.width)x\(.height) \(.scale)"' 2>/dev/null)
-  [[ -n $active && $wanted != "$active" ]] || return 0
+  read -r active active_rate scale < <(hyprctl -j monitors 2>/dev/null | jq -r '.[0] | "\(.width)x\(.height) \(.refreshRate | round) \(.scale)"' 2>/dev/null)
+  [[ -n $active ]] || return 0
+  [[ $wanted != "$active" || $active_rate != "$rate" ]] || return 0
   # Omarchy's Hyprland runs the Lua config, so runtime changes go through eval
-  hyprctl eval "hl.monitor({ output = \"Virtual-1\", mode = \"${wanted}@60\", position = \"auto\", scale = ${scale:-1} })" >/dev/null 2>&1
+  hyprctl eval "hl.monitor({ output = \"Virtual-1\", mode = \"${wanted}@${rate}\", position = \"auto\", scale = ${scale:-1} })" >/dev/null 2>&1
 }
 
 # Apply only once the requested size has held still for a poll: while the window
