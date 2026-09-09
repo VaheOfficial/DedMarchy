@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# omarchy:summary=Serve this session to Hyper-V Enhanced Session Mode over vsock (no-op outside a set-up Hyper-V guest)
+
+omarchy-hw-hyperv || exit 0
+command -v lamco-rdp-server &>/dev/null || exit 0
+
+config=~/.config/lamco-rdp-server/config.toml
+[[ -f $config ]] || exit 0
+
+# Needs WAYLAND_DISPLAY and HYPRLAND_INSTANCE_SIGNATURE, so it runs from the
+# session (default/hypr/vm.lua), not from a systemd unit.
+exec lamco-rdp-server -c "$config"

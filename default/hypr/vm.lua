@@ -31,3 +31,10 @@ if not (vmware or virtualbox or hyperv) then
 end
 
 hl.env("LIBGL_ALWAYS_SOFTWARE", "1")
+
+-- Hyper-V Enhanced Session Mode: VMConnect attaches to an RDP server that
+-- shares this session over vsock. Set up by dedsec/hyperv.sh; the launcher
+-- is a no-op until then.
+if hyperv then
+  hl.exec_cmd(o.launch("omarchy-launch-hyperv-rdp"))
+end

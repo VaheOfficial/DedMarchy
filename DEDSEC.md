@@ -35,7 +35,7 @@ The bootstrap clones the fork into `~/omarchy`, links Omarchy to it, and runs `d
 | Shell prompt | DedSec Starship prompt |
 | Menu | DedSec rows in the Omarchy menu (see below) |
 | Desktop HUD | eww overlay with node info, log feed, diagnostics |
-| VM support | Software rendering for the whole session inside VMware, VirtualBox, or Hyper-V, plus guest tools |
+| VM support | Software rendering for the whole session inside VMware, VirtualBox, or Hyper-V, plus guest tools; on Hyper-V, Enhanced Session Mode |
 | Login screen | greetd with the DedSec Quickshell greeter, replacing SDDM |
 | Boot splash | DedSec Plymouth theme published from the checkout |
 
@@ -43,7 +43,21 @@ Environment overrides: `DEDSEC_REPO`, `DEDSEC_REF`, `DEDSEC_CHECKOUT`.
 
 ### Virtual machines
 
-Run the bootstrap inside the VM after the ISO install. On VMware, VirtualBox, and Hyper-V the setup writes `LIBGL_ALWAYS_SOFTWARE=1` to `/etc/environment.d/10-dedsec-vm.conf` so the compositor, the shell, and every app render on the CPU through one path, which is what keeps VMware's half-working virtual GPU from wedging the session. The greeter is launched with the same flag. VMware also gets `open-vm-tools`; Hyper-V gets the `hyperv` integration daemons. `E:\Hyper-VOmarchy\OmarchySetup.ps1` creates a ready-made Hyper-V VM on Windows.
+Run the bootstrap inside the VM after the ISO install. On VMware, VirtualBox, and Hyper-V the setup writes `LIBGL_ALWAYS_SOFTWARE=1` to `/etc/environment.d/10-dedsec-vm.conf` so the compositor, the shell, and every app render on the CPU through one path, which is what keeps VMware's half-working virtual GPU from wedging the session. The greeter is launched with the same flag. VMware also gets `open-vm-tools`. `E:\Hyper-VOmarchy\OmarchySetup.ps1` creates a ready-made Hyper-V VM on Windows.
+
+#### Hyper-V Enhanced Session Mode
+
+Hyper-V's Enhanced Session is an RDP client built into VMConnect that reaches the guest over an AF_VSOCK socket on port 3389 rather than the network. It is what gives a VM a resizable window, clipboard, and audio. The usual answer for Linux guests is xrdp, which is X11-only and cannot show a Hyprland session, so DedSec uses [lamco-rdp-server](https://github.com/lamco-admin/lamco-rdp-server), a Wayland-native RDP server that shares the running session. `dedsec/hyperv.sh` sets it up when it detects a Hyper-V guest:
+
+- `hyperv` integration daemons, and `hv_sock` loaded at boot (the AF_VSOCK provider for Hyper-V).
+- `openh264` for software H.264; a Hyper-V guest has no GPU encoder.
+- `lamco-rdp-server-vsock`, built from `dedsec/pkgs/lamco-rdp-server-vsock/` (the AUR recipe plus the `vsock` Cargo feature, which the AUR build leaves out). A Rust release build: several minutes and a few GB of scratch space under `~/.cache/dedsec/`. The package provides `lamco-rdp-server`, so updating it means bumping the recipe, not `yay`.
+- `~/.config/lamco-rdp-server/config.toml` from `config/lamco-rdp-server/`: vsock listener on, TCP listener off, `security_mode = "rdp"`. VMConnect speaks plain Standard RDP Security and never upgrades to TLS, which is why 1.4.5 or newer is required and why the TCP listener stays off.
+- `omarchy-launch-hyperv-rdp` starts the server with the session from `default/hypr/vm.lua`, so it inherits `WAYLAND_DISPLAY`. The packaged systemd unit is not used: it blocks `AF_VSOCK` and does not see the session environment.
+
+On the host, `OmarchySetup.ps1` runs `Set-VMHost -EnableEnhancedSessionMode $true` and `Set-VM -EnhancedSessionTransportType HvSocket`; that parameter exists on Windows 10/11 Pro and Enterprise Hyper-V.
+
+Using it: the server shares an existing session, so log in on the console first, then choose View > Enhanced Session in VMConnect. The resolution dialog picks the window size; `1.4.5` asks Hyprland to switch the virtual output to that size. The first connection may show Omarchy's screen-share picker on the console; approve it once and the portal remembers the choice. The login screen itself is not reachable over Enhanced Session; that is the basic session's job. Check the server with `journalctl --user -b | grep lamco` (look for `vsock listener bound`) or `lamco-rdp-server --show-capabilities`.
 
 ---
 
@@ -110,7 +124,8 @@ Started with the session from `default/hypr/autostart.lua` when eww is installed
 | `omarchy-cmd-hide-manager` | Hide or show apps in the launcher |
 | `omarchy-tui-list`, `omarchy-tui-show` | Inspect installed TUI shortcuts |
 | `omarchy-refresh-greeter` | Re-deploy the greeter and greetd session |
-| `omarchy-hw-vm`, `omarchy-hw-vmware` | VM detection helpers |
+| `omarchy-hw-vm`, `omarchy-hw-vmware`, `omarchy-hw-hyperv` | VM detection helpers |
+| `omarchy-launch-hyperv-rdp` | Start the Enhanced Session RDP server with the session (no-op elsewhere) |
 | `omarchy-dev-generate-logos` | Regenerate branding assets |
 
 `omarchy-pkg-add` passes `--overwrite '*' --ask 4` so non-interactive installs never stop on a file already on disk or a "remove conflicting package?" prompt.
@@ -122,7 +137,8 @@ Started with the session from `default/hypr/autostart.lua` when eww is installed
 ```
 DedMarchy/
   dedsec.sh               # Bootstrap: clone, dev-link, setup
-  dedsec/                 # Setup steps: setup.sh, greetd.sh, eww.sh, vm.sh, vmware.sh, blackarch-*.sh
+  dedsec/                 # Setup steps: setup.sh, greetd.sh, eww.sh, vm.sh, vmware.sh, hyperv.sh, blackarch-*.sh
+    pkgs/                 # lamco-rdp-server-vsock PKGBUILD
   bin/                    # Omarchy commands plus the DedSec ones above
   shell/                  # Omarchy 4 Quickshell desktop (unchanged)
   default/
@@ -134,6 +150,7 @@ DedMarchy/
     omarchy/extensions/   # Menu rows
     eww/                  # HUD widgets
     starship.toml         # Prompt
+    lamco-rdp-server/     # Enhanced Session RDP server config
   themes/dedsec/          # The theme
   DEDSEC.md
 ```

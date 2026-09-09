@@ -44,6 +44,7 @@ bash "$DEDSEC/eww.sh"
 step "Virtual machine support"
 bash "$DEDSEC/vmware.sh"
 bash "$DEDSEC/vm.sh"
+bash "$DEDSEC/hyperv.sh"
 
 step "Login screen"
 bash "$DEDSEC/greetd.sh"

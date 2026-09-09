@@ -1,0 +1,49 @@
+# DedSec: Hyper-V Enhanced Session Mode.
+#
+# lamco-rdp-server shares the running Hyprland session with VMConnect. The
+# host reaches it over an AF_VSOCK socket on port 3389, not the network.
+# VMConnect speaks plain Standard RDP Security and never upgrades to TLS, so
+# security_mode has to be "rdp"; that is safe only because the TCP listener is
+# off and the vsock socket is reachable from the Hyper-V host alone.
+#
+# The [server] and [security] tables are written out in full on purpose: the
+# server needs every key in those two tables present. Everything else falls
+# back to the built-in defaults. Run `lamco-rdp-server --generate-config` to
+# see them all. Installed to ~/.config/lamco-rdp-server/config.toml by
+# dedsec/hyperv.sh, which fills in __HOME__.
+
+[server]
+listen_addr = "127.0.0.1:3389"
+max_connections = 10
+session_timeout = 0
+use_portals = true
+view_only = false
+
+[server.transports.tcp]
+enabled = false
+
+[server.transports.vsock]
+enabled = true
+port = 3389
+
+[security]
+cert_path = "__HOME__/.config/lamco-rdp-server/cert.pem"
+key_path = "__HOME__/.config/lamco-rdp-server/key.pem"
+security_mode = "rdp"
+auth_method = "none"
+require_tls_13 = false
+
+# Keyboard and mouse through Hyprland's virtual keyboard and pointer protocols
+[input]
+input_protocol = "wlr"
+keyboard_layout = "auto"
+enable_touch = false
+
+[clipboard]
+enabled = true
+max_size = 10485760
+allowed_types = []
+protocol = "auto"
+
+[audio]
+enabled = true

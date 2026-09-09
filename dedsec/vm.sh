@@ -12,9 +12,3 @@ fi
 
 sudo mkdir -p /etc/environment.d
 echo "LIBGL_ALWAYS_SOFTWARE=1" | sudo tee /etc/environment.d/10-dedsec-vm.conf >/dev/null
-
-# Hyper-V guest integration services
-if [[ $(systemd-detect-virt --vm 2>/dev/null) == "microsoft" ]]; then
-  omarchy-pkg-add hyperv
-  sudo systemctl enable --now hv_kvp_daemon.service hv_vss_daemon.service
-fi

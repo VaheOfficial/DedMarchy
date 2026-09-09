@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# omarchy:summary=Detect whether the system is running as a Hyper-V guest
+
+if command -v systemd-detect-virt &>/dev/null; then
+  [[ $(systemd-detect-virt --vm 2>/dev/null) == "microsoft" ]] && exit 0
+fi
+
+grep -qi 'microsoft corporation' /sys/class/dmi/id/sys_vendor 2>/dev/null &&
+  grep -qi 'virtual machine' /sys/class/dmi/id/product_name 2>/dev/null
