@@ -43,10 +43,9 @@ sha256sums=('916a09225a22653ec5e56b1df5bbfacc7f69b2b9e8ac734052936bcb75cde49a'
             'SKIP')
 
 prepare() {
-  cd "${srcdir}/${pkgname}/"
-  # clipway is a git-format patch against the repository root
+  cd "${srcdir}/${pkgname}/open-vm-tools/"
+  # clipway's paths are relative to the open-vm-tools/ subdirectory, like Arch's patch
   patch -Np1 -i "${srcdir}/0001-dndcp-wayland-clipboard-backend.patch"
-  cd open-vm-tools/
   patch -Np1 -i ../../open-vm-tools-gcc16.patch
   autoreconf -vi
 }
