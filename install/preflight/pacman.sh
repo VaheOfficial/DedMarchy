@@ -1,4 +1,13 @@
 if [[ -n ${OMARCHY_ONLINE_INSTALL:-} ]]; then
+  # Fresh installs from older Arch media ship a stale keyring, which makes every
+  # signed package fail as "unknown trust". Refresh it before anything downloads.
+  sudo pacman-key --init
+  sudo pacman-key --populate archlinux
+  sudo pacman -Sy --noconfirm --needed archlinux-keyring
+
+  # Drop half-downloaded packages left by an interrupted run
+  sudo rm -f /var/cache/pacman/pkg/*.part
+
   # Install build tools
   omarchy-pkg-add base-devel
 
