@@ -16,6 +16,8 @@ done
 step() { echo -e "\n\e[32m==> $*\e[0m"; }
 
 step "Packages"
+# A fresh ISO install has no synced package databases yet
+sudo pacman -Sy --noconfirm
 omarchy-pkg-add greetd quickshell rustscan
 
 step "Theme"
