@@ -6,7 +6,11 @@
 # omarchy:requires-sudo=true
 
 if omarchy-pkg-missing "$@"; then
-  sudo pacman -S --noconfirm --needed "$@" || exit 1
+  # DedSec: the install is non-interactive, so resolve the two prompts pacman
+  # would otherwise stop on. --overwrite takes files already on disk (custom
+  # omarchy-* and BlackArch packages ship overlapping files) and --ask 4 answers
+  # yes to "remove conflicting package?", which --noconfirm alone answers no.
+  sudo pacman -S --noconfirm --needed --overwrite '*' --ask 4 "$@" || exit 1
 fi
 
 for pkg in "$@"; do

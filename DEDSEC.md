@@ -375,6 +375,10 @@ Auto-detected and configured:
 
 VMware, VirtualBox, and Hyper-V guests are detected (`omarchy-hw-vm`). None of them give a Wayland session usable hardware GL, and mixing a hardware compositor with software apps wedges VMware's virtual GPU, so the whole session renders on the CPU the way a Hyper-V guest does: the installer writes `LIBGL_ALWAYS_SOFTWARE=1` to `/etc/environment.d/10-dedsec-vm.conf`, greetd launches the greeter compositor with it, and `default/hypr/vm.lua` and the greeter launcher apply it as well. Hyper-V guests also get the `hyperv` integration daemons. On VMware it also computes `o.vm_display_mode`, 20x30 px smaller than the VM window, which the default `~/.config/hypr/monitors.lua` uses so the VMware console keeps focus; a mode or scale set in that file always wins. `omarchy-hw-vmware-display-watch` reloads Hyprland when the VM window is resized so the mode follows it, and the installer adds `open-vm-tools` (`omarchy-hw-vmware`). Based on https://www.robwillis.info/2025/11/installing-omarchy-on-vmware-workstation/ and https://github.com/omacom/omarchy/discussions/7758
 
+### Package Installs
+
+`omarchy-pkg-add` (used by the installer and the menus) runs pacman with `--overwrite '*' --ask 4` so a non-interactive install never stops on a file already on disk or on a "remove conflicting package?" prompt, which `--noconfirm` alone answers no.
+
 ### Migrations
 
 Timestamped scripts in `migrations/`. Run automatically on update. Tracked via touch files in `~/.local/state/omarchy/migrations/`.
