@@ -6,6 +6,53 @@ local function shell_quote(value)
   return "'" .. tostring(value):gsub("'", "'\\''") .. "'"
 end
 
+o.shell_quote = shell_quote
+
+local function file_exists(path)
+  local file = io.open(path, "r")
+  if file then
+    file:close()
+    return true
+  end
+
+  return false
+end
+
+-- Hyprland reaps its own children, so os.execute() can't retrieve an exit status
+-- from inside the compositor. Read a marker off stdout instead.
+function o.shell_succeeds(command)
+  -- Subshell, so the redirection covers every command rather than binding to
+  -- the last one and letting an earlier one write its own OK into the pipe.
+  local pipe = io.popen("( " .. command .. " ) >/dev/null 2>&1 && echo OK")
+  if not pipe then
+    return false
+  end
+
+  local output = pipe:read("*a") or ""
+  pipe:close()
+
+  return output:find("OK", 1, true) ~= nil
+end
+
+function o.cmd_present(command)
+  if command:find("/", 1, true) then
+    return file_exists(command)
+  end
+
+  local path = os.getenv("PATH") or "/usr/local/bin:/usr/bin"
+  for directory in (path .. ":"):gmatch("([^:]*):") do
+    if file_exists((directory ~= "" and directory or ".") .. "/" .. command) then
+      return true
+    end
+  end
+
+  return false
+end
+
+function o.cmd_missing(command)
+  return not o.cmd_present(command)
+end
+
 local function command_from(value, description)
   if type(value) ~= "table" then
     return value
@@ -32,6 +79,14 @@ local function command_from(value, description)
   end
 
   return value
+end
+
+function o.preinstalled_bindings_enabled()
+  if _G.omarchy_preinstalled_bindings ~= nil then
+    return _G.omarchy_preinstalled_bindings == true
+  end
+
+  return not file_exists((os.getenv("HOME") or "") .. "/.local/state/omarchy/preinstalls-removed")
 end
 
 function o.bind(keys, description, dispatcher, options)
@@ -76,16 +131,12 @@ function o.launch_sole(match, command)
   return "omarchy-launch-or-focus " .. shell_quote(match) .. " " .. shell_quote(o.launch(command))
 end
 
-function o.bind_menu(keys, description, menu, options)
-  o.bind(keys, description, menu and ("omarchy-menu " .. menu) or "omarchy-menu", options)
-end
-
 function o.bind_toggle(keys, description, toggle, options)
   o.bind(keys, description, "omarchy-toggle-" .. toggle, options)
 end
 
 function o.notify(message)
-  return "notify-send -u low " .. shell_quote(message)
+  return "omarchy-notification-send -u low " .. shell_quote(message)
 end
 
 function o.window(match, rules)

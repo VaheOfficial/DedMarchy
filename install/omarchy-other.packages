@@ -1,29 +1,20 @@
 # Packages installed outside of install/packages.sh or optional packages
 # Utilized by ISO builder to ensure package availability in the ISO
 
-asusctl
 autoconf-archive
+asusctl
 base
 base-devel
-broadcom-wl
+broadcom-wl-dkms
 btrfs-progs
-dart
 dkms
 egl-wayland
-eww
-git
 gst-plugin-pipewire
 gtk4-layer-shell
-htop
+libpulse
 intel-ipu7-camera
 intel-lpmd
 intel-media-driver
-intltool
-jdk-openjdk
-lib32-nvidia-580xx-utils
-lib32-nvidia-utils
-libpulse
-libsass
 libva-intel-driver
 libva-nvidia-driver
 limine
@@ -36,24 +27,23 @@ linux-ptl
 linux-ptl-headers
 macbook12-spi-driver-dkms
 nvidia-580xx-dkms
-nvidia-580xx-utils
 nvidia-dkms
 nvidia-open-dkms
+nvidia-580xx-utils
 nvidia-utils
+lib32-nvidia-580xx-utils
+lib32-nvidia-utils
 pipewire
 pipewire-alsa
 pipewire-jack
 pipewire-pulse
 qt6-wayland
-rustscan
-sassc
 snapper
 sof-firmware
 thermald
-tuxedo-drivers-nocompatcheck-dkms
 webp-pixbuf-loader
-wget
 yay-debug
+tuxedo-drivers-nocompatcheck-dkms
 yt6801-dkms
 zram-generator
 
@@ -72,13 +62,15 @@ linux-firmware-marvell
 # Dell laptop support packages
 dell-xps-touchpad-haptics
 
+# Speaker tunings (LV2 limiter every tuning ends in)
+lsp-plugins-lv2
+
 # T2 MacBook support packages
 apple-bcm-firmware
 apple-t2-audio-config
 linux-t2
 linux-t2-headers
 t2fanrd
-tiny-dfr
 
-# VMware guest support packages
-open-vm-tools
+# Framework 16
+qmk-hid

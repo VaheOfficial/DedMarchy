@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# omarchy:summary=Browse and launch the installed tools of a BlackArch group, or install the group
+# omarchy:args=<group> [display-name]
+# omarchy:examples=omarchy blackarch tools blackarch-recon Recon
+
+group="${1:-}"
+name="${2:-$group}"
+
+if [[ -z $group ]]; then
+  echo "Usage: omarchy-blackarch-tools <blackarch-group> [display-name]" >&2
+  exit 1
+fi
+
+if ! grep -q '^\[blackarch\]' /etc/pacman.conf 2>/dev/null; then
+  if gum confirm "The BlackArch repository is not enabled. Enable it now?"; then
+    bash "$OMARCHY_PATH/dedsec/blackarch-repo.sh"
+  else
+    exit 0
+  fi
+fi
+
+mapfile -t tools < <(pacman -Qg "$group" 2>/dev/null | awk '{print $2}' | sort)
+
+if (( ${#tools[@]} == 0 )); then
+  if gum confirm "No $name tools installed. Install the $group group?"; then
+    sudo pacman -S --needed --noconfirm --overwrite '*' --ask 4 "$group"
+  fi
+  exit 0
+fi
+
+choice=$(printf '%s\n' "${tools[@]}" | gum filter --placeholder "$name tools (${#tools[@]} installed)")
+[[ -n $choice ]] || exit 0
+
+echo
+echo -e "\e[32m> $choice\e[0m"
+echo
+"$choice" --help 2>&1 | head -n 60 || true
+echo
+echo "Run it from any terminal with: $choice"

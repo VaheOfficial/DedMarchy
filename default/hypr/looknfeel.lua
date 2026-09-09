@@ -51,7 +51,7 @@ hl.config({
       font_family = "JetBrainsMono Nerd Font",
       font_weight_active = "ultraheavy",
       font_weight_inactive = "normal",
-      indicator_height = 0,
+      indicator_height = 1,
       indicator_gap = 4,
       height = 22,
       gaps_in = 2,
@@ -90,6 +90,7 @@ hl.animation({ leaf = "windowsOut", enabled = true, speed = 1.0, bezier = "insta
 hl.animation({ leaf = "fadeIn", enabled = true, speed = 1.2, bezier = "almostLinear" })
 hl.animation({ leaf = "fadeOut", enabled = true, speed = 0.8, bezier = "almostLinear" })
 hl.animation({ leaf = "fade", enabled = true, speed = 2, bezier = "snappy" })
+hl.animation({ leaf = "fadeSwitch", enabled = false })
 hl.animation({ leaf = "layers", enabled = true, speed = 2.2, bezier = "snappy" })
 hl.animation({ leaf = "layersIn", enabled = true, speed = 2.4, bezier = "snappy", style = "fade" })
 hl.animation({ leaf = "layersOut", enabled = true, speed = 1.0, bezier = "instant", style = "fade" })
@@ -119,6 +120,10 @@ hl.config({
     focus_on_activate = true,
     anr_missed_pings = 3,
     on_focus_under_fullscreen = 1,
+    initial_workspace_tracking = 0,
+    -- Let a fresh shell re-acquire the session lock after the lock client
+    -- died, so omarchy-restart-shell can recover the LOCK failsafe.
+    allow_session_lock_restore = true,
   },
 
   cursor = {
