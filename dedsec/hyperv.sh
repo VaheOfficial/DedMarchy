@@ -63,9 +63,11 @@ if [[ ! -f $conf ]] || grep -q '^# DedSec' "$conf"; then
 fi
 
 # A server from an earlier config may still hold the vsock port; move it to the
-# new config now so the forwarder can bind without a re-login.
-if pgrep -x lamco-rdp-server >/dev/null; then
-  pkill -x lamco-rdp-server
+# new config now so the forwarder can bind without a re-login. Matched on the
+# command line: the process name is truncated to 15 characters, one short.
+server='(^|/)lamco-rdp-server( |$)'
+if pgrep -f "$server" >/dev/null; then
+  pkill -f "$server"
   sleep 1
   setsid -f omarchy-launch-hyperv-rdp >/dev/null 2>&1
 fi
