@@ -57,7 +57,9 @@ With "Accelerate 3D graphics" on, VMware's virtual GPU gives the guest a real re
 
 No `LIBGL_ALWAYS_SOFTWARE` on VMware: mixing a software compositor with the virtual GPU is what wedged it before.
 
-On the host, VMware has to own the CPU. With Hyper-V, WSL2, or core isolation active, Windows' hypervisor is running and VMware falls back to its compatibility mode, which is slow and where 3D acceleration is unreliable. `E:\VMwareOmarchy\HyperVOff.ps1` turns that off (Hyper-V, WSL2, and Docker Desktop pause until `HyperVOn.ps1`), and `E:\VMwareOmarchy\OmarchySetup.ps1` creates the VM with 3D on and 8 GB of graphics memory.
+On the host, Hyper-V, WSL2, and Docker Desktop can stay on: VMware then runs on the Windows Hypervisor Platform, which costs some CPU performance but keeps 3D acceleration. `E:\VMwareOmarchy\OmarchySetup.ps1` creates the VM with 3D on and 8 GB of graphics memory; `HyperVOff.ps1` and `HyperVOn.ps1` are an optional toggle for the days when VMware speed matters more than Docker (both need a reboot).
+
+The v3 DedSec line ran VMware without `AQ_NO_ATOMIC`, which is the setting Omarchy #7918 identifies as the cause of page-flip hangs on vmwgfx; that matches the whole-VM freezes seen back then.
 
 #### VirtualBox and Hyper-V
 
