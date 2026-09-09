@@ -51,13 +51,20 @@ Hyper-V's Enhanced Session is an RDP client built into VMConnect that reaches th
 
 - `hyperv` integration daemons, and `hv_sock` loaded at boot (the AF_VSOCK provider for Hyper-V).
 - `openh264` for software H.264; a Hyper-V guest has no GPU encoder.
-- `lamco-rdp-server-vsock`, built from `dedsec/pkgs/lamco-rdp-server-vsock/` (the AUR recipe plus the `vsock` Cargo feature, which the AUR build leaves out). A Rust release build: several minutes and a few GB of scratch space under `~/.cache/dedsec/`. The package provides `lamco-rdp-server`, so updating it means bumping the recipe, not `yay`.
-- `~/.config/lamco-rdp-server/config.toml` from `config/lamco-rdp-server/`: vsock listener on, TCP listener off, `security_mode = "rdp"`. VMConnect speaks plain Standard RDP Security and never upgrades to TLS, which is why 1.4.5 or newer is required and why the TCP listener stays off.
-- `omarchy-launch-hyperv-rdp` starts the server with the session from `default/hypr/vm.lua`, so it inherits `WAYLAND_DISPLAY`. The packaged systemd unit is not used: it blocks `AF_VSOCK` and does not see the session environment.
+- `lamco-rdp-server-vsock`, built from `dedsec/pkgs/lamco-rdp-server-vsock/` (the AUR recipe with the `vsock` Cargo feature and without the system-bus policy for a service user that does not exist here). A Rust release build: several minutes and a few GB of scratch space under `~/.cache/dedsec/`. The package provides `lamco-rdp-server`, so updating it means bumping the recipe, not `yay`; a new `pkgver` triggers a rebuild, a `pkgrel` bump alone does not.
+- `~/.config/lamco-rdp-server/config.toml` from `config/lamco-rdp-server/`: TCP listener on loopback 3389, own vsock listener off, `security_mode = "rdp"`. VMConnect speaks plain Standard RDP Security and never upgrades to TLS, which is why 1.4.5 or newer is required and why the listener stays on loopback.
+- `dedsec-hyperv-esm.service`, a `socat` forwarder from vsock 3389 to loopback 3389, enabled at boot. Hyper-V decides whether to offer Enhanced Session when the VM starts, by probing that vsock port, and the RDP server only exists once someone is logged in. Without a listener at boot the button stays grey (the WMI `EnhancedSessionModeState` reads 6, "allowed but not available") until the VM is saved and restored. With the forwarder it reads 2 from boot.
+- `omarchy-launch-hyperv-rdp` starts the server with the session from `default/hypr/vm.lua`, so it inherits `WAYLAND_DISPLAY`. The packaged systemd unit is not used: it does not see the session environment.
 
-On the host, `OmarchySetup.ps1` runs `Set-VMHost -EnableEnhancedSessionMode $true` and `Set-VM -EnhancedSessionTransportType HvSocket`; that parameter exists on Windows 10/11 Pro and Enterprise Hyper-V.
+On the host, `OmarchySetup.ps1` runs `Set-VMHost -EnableEnhancedSessionMode $true` and `Set-VM -EnhancedSessionTransportType HvSocket`; that parameter exists on Windows 10/11 Pro and Enterprise Hyper-V. The transport is read when the VM starts, so set it while the VM is off.
 
-Using it: the server shares an existing session, so log in on the console first, then choose View > Enhanced Session in VMConnect. The resolution dialog picks the window size; `1.4.5` asks Hyprland to switch the virtual output to that size. The first connection may show Omarchy's screen-share picker on the console; approve it once and the portal remembers the choice. The login screen itself is not reachable over Enhanced Session; that is the basic session's job. Check the server with `journalctl --user -b | grep lamco` (look for `vsock listener bound`) or `lamco-rdp-server --show-capabilities`.
+Using it: the server shares an existing session, so log in on the console first, then choose View > Enhanced Session in VMConnect. Before login the forward is refused and VMConnect drops back to the basic session; that is expected. The resolution dialog picks the window size; `1.4.5` asks Hyprland to switch the virtual output to that size. The first connection may show Omarchy's screen-share picker on the console; approve it once and the portal remembers the choice. To check: `systemctl status dedsec-hyperv-esm` and `ss -l --vsock` for the vsock listener, `pgrep -a lamco` for the server, and on the host
+
+```powershell
+(Get-CimInstance -Namespace root\virtualization\v2 -ClassName Msvm_ComputerSystem -Filter "ElementName='DedSec'").EnhancedSessionModeState
+```
+
+which is 2 when VMConnect will offer the button.
 
 ---
 
