@@ -29,6 +29,10 @@ greeter_launch="start-hyprland -- --config /etc/dedsec/greeter.hyprland.lua"
 if omarchy-hw-vm; then
   greeter_launch="env LIBGL_ALWAYS_SOFTWARE=1 $greeter_launch"
 fi
+# vmwgfx: atomic modesetting hangs page flips (Omarchy #7918)
+if omarchy-hw-vmware; then
+  greeter_launch="env AQ_NO_ATOMIC=1 $greeter_launch"
+fi
 
 sudo tee /etc/greetd/config.toml > /dev/null << EOF
 [terminal]

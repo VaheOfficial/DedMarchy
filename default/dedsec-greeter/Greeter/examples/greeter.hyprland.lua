@@ -18,6 +18,8 @@ hl.config({
 
   cursor = {
     inactive_timeout = 3,
+    -- VMware's vmwgfx never commits the hardware cursor plane; software cursors everywhere is harmless.
+    no_hardware_cursors = true,
   },
 })
 

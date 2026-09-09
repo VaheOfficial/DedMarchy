@@ -1,12 +1,14 @@
 -- Virtual machine tweaks, applied only inside VMware, VirtualBox, or Hyper-V guests.
 --
--- Their virtual GPUs cannot hand clients a usable hardware GL context, and
--- mixing a hardware compositor with software apps wedges VMware's virtual GPU.
--- The DedSec setup writes LIBGL_ALWAYS_SOFTWARE=1 to /etc/environment.d so the
--- whole session renders on the CPU; this keeps Hyprland's own children covered
--- when that file is missing, such as a dev checkout before setup has run.
--- See https://www.robwillis.info/2025/11/installing-omarchy-on-vmware-workstation/
--- and https://github.com/omacom/omarchy/discussions/7758
+-- VirtualBox and Hyper-V cannot hand clients a usable hardware GL context, so
+-- the DedSec setup writes LIBGL_ALWAYS_SOFTWARE=1 to /etc/environment.d and the
+-- whole session renders on the CPU; the env below keeps Hyprland's own children
+-- covered when that file is missing, such as a dev checkout before setup has run.
+--
+-- VMware with 3D acceleration is different: vmwgfx gives the guest a real render
+-- node, so everything renders on the host GPU. It needs the patched hyprland
+-- from dedsec/pkgs/hyprland-vmwgfx, no atomic modesetting, and software
+-- cursors (Omarchy #7918, #8113). dedsec/vmware.sh sets the system side up.
 
 local function read_first_line(path)
   local file = io.open(path, "r")
@@ -27,6 +29,21 @@ local virtualbox = dmi:find("VirtualBox") ~= nil or dmi:find("innotek") ~= nil
 local hyperv = dmi:find("Microsoft Corporation") ~= nil
 
 if not (vmware or virtualbox or hyperv) then
+  return
+end
+
+if vmware then
+  -- Atomic modesetting hangs page flips on vmwgfx, and its cursor plane never commits.
+  hl.env("AQ_NO_ATOMIC", "1")
+  hl.config({
+    cursor = {
+      no_hardware_cursors = true,
+    },
+  })
+
+  -- Follow the VM window when it is resized, and share the host clipboard.
+  hl.exec_cmd(o.launch("omarchy-hw-vmware-display-watch"))
+  hl.exec_cmd(o.launch("omarchy-launch-vmware-user"))
   return
 end
 

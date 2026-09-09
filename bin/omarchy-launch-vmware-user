@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# omarchy:summary=Run the VMware user daemon inside the Wayland session for host clipboard sharing (no-op elsewhere)
+
+omarchy-hw-vmware || exit 0
+command -v vmtoolsd &>/dev/null || exit 0
+
+# The clipway backend in DedSec's open-vm-tools build picks Wayland when
+# WAYLAND_DISPLAY is set and the session type says so; stock tools would only
+# start this for X11. Text only, both directions, through wl-copy and wl-paste.
+export XDG_SESSION_TYPE=wayland
+exec vmtoolsd -n vmusr

@@ -1,0 +1,65 @@
+From: DedSec <dedsec@dedmarchy>
+Subject: [PATCH] linux-dmabuf: release vmwgfx surface handles on import
+
+VMware's vmwgfx driver answers drmPrimeFDToHandle with a TTM surface
+handle rather than a GEM handle, so drmCloseBufferHandle fails and every
+dmabuf import from a client is rejected: GPU-accelerated Wayland clients
+(kitty, Chromium, Quickshell) die with "invalid arguments for
+wl_surface.attach" as soon as VMware 3D acceleration is on. When the
+generic close fails and the device is vmwgfx, drop the handle through
+DRM_VMW_UNREF_SURFACE instead.
+
+Origin: https://github.com/hyprwm/Hyprland/discussions/12966
+Tested there on Hyprland 0.56.2 with VMware Workstation.
+---
+diff --git a/src/protocols/LinuxDMABUF.cpp b/src/protocols/LinuxDMABUF.cpp
+index 897c98d..c5ffaef 100644
+--- a/src/protocols/LinuxDMABUF.cpp
++++ b/src/protocols/LinuxDMABUF.cpp
+@@ -2,6 +2,7 @@
+ #include <algorithm>
+ #include <set>
+ #include <tuple>
++#include <cstring>
+ #include "../helpers/MiscFunctions.hpp"
+ #include <sys/mman.h>
+ #include <xf86drm.h>
+@@ -260,6 +261,29 @@ void CLinuxDMABUFParamsResource::create(uint32_t id) {
+     m_createdBuffer = buf;
+ }
+ 
++// vmwgfx hands out TTM surface handles for imported dmabufs, which the GEM
++// close in drmCloseBufferHandle does not know about. Release those through
++// the driver's own ioctl. Returns non-zero when the device is not vmwgfx.
++// Origin: https://github.com/hyprwm/Hyprland/discussions/12966
++#define DRM_VMW_UNREF_SURFACE 10
++
++struct drmVmwSurfaceArg {
++    int32_t  sid;
++    uint32_t handleType;
++};
++
++static int closeVmwGFXHandle(int fd, uint32_t handle) {
++    drmVersionPtr version  = drmGetVersion(fd);
++    bool          isVmwgfx = version && version->name && strncmp(version->name, "vmwgfx", version->name_len) == 0;
++    if (version)
++        drmFreeVersion(version);
++    if (!isVmwgfx)
++        return -1;
++
++    drmVmwSurfaceArg arg = {(int32_t)handle, 0};
++    return drmCommandWrite(fd, DRM_VMW_UNREF_SURFACE, &arg, sizeof(arg));
++}
++
+ bool CLinuxDMABUFParamsResource::commence() {
+     if (!PROTO::linuxDma->m_mainDeviceFD.isValid())
+         return true;
+@@ -272,7 +296,7 @@ bool CLinuxDMABUFParamsResource::commence() {
+             return false;
+         }
+ 
+-        if (drmCloseBufferHandle(PROTO::linuxDma->m_mainDeviceFD.get(), handle)) {
++        if (drmCloseBufferHandle(PROTO::linuxDma->m_mainDeviceFD.get(), handle) != 0 && closeVmwGFXHandle(PROTO::linuxDma->m_mainDeviceFD.get(), handle) != 0) {
+             LOGM(Log::ERR, "Failed to close dmabuf handle");
+             return false;
+         }

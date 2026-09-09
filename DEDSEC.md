@@ -35,7 +35,7 @@ The bootstrap clones the fork into `~/omarchy`, links Omarchy to it, and runs `d
 | Shell prompt | DedSec Starship prompt |
 | Menu | DedSec rows in the Omarchy menu (see below) |
 | Desktop HUD | eww overlay with node info, log feed, diagnostics |
-| VM support | Software rendering for the whole session inside VMware, VirtualBox, or Hyper-V, plus guest tools; on Hyper-V, Enhanced Session Mode |
+| VM support | VMware: GPU-accelerated Hyprland, window-following display, host clipboard, shared folders. VirtualBox and Hyper-V: software rendering; Hyper-V adds Enhanced Session Mode |
 | Login screen | greetd with the DedSec Quickshell greeter, replacing SDDM |
 | Boot splash | DedSec Plymouth theme published from the checkout |
 
@@ -43,7 +43,25 @@ Environment overrides: `DEDSEC_REPO`, `DEDSEC_REF`, `DEDSEC_CHECKOUT`.
 
 ### Virtual machines
 
-Run the bootstrap inside the VM after the ISO install. On VMware, VirtualBox, and Hyper-V the setup writes `LIBGL_ALWAYS_SOFTWARE=1` to `/etc/environment.d/10-dedsec-vm.conf` so the compositor, the shell, and every app render on the CPU through one path, which is what keeps VMware's half-working virtual GPU from wedging the session. The greeter is launched with the same flag. VMware also gets `open-vm-tools`. `E:\Hyper-VOmarchy\OmarchySetup.ps1` creates a ready-made Hyper-V VM on Windows.
+Run the bootstrap inside the VM after the ISO install.
+
+#### VMware Workstation (recommended on Windows)
+
+With "Accelerate 3D graphics" on, VMware's virtual GPU gives the guest a real render node, so Hyprland, the shell, and every app render on the host GPU, and the display follows the VM window. Upstream Omarchy is unusable in that configuration (Omarchy #8113, cursor and modesetting quirks in #7918, clipboard dead on Wayland in open-vm-tools #510 and #792). `dedsec/vmware.sh` closes each gap:
+
+- `hyprland` rebuilt from Omarchy's recipe with one patch, `dedsec/pkgs/hyprland-vmwgfx/`: dmabufs imported on vmwgfx come back as TTM surface handles, so the generic close fails and every GPU client is rejected; the patch releases them through the driver's own ioctl (from Hyprland discussion #12966, tested there on 0.56.2 with Chromium and Quickshell). The recipe tracks Omarchy's package version and is only built when the installed version matches; after Omarchy moves Hyprland, bump the recipe.
+- `AQ_NO_ATOMIC=1` for every Hyprland instance, and software cursors, from `/etc/environment.d/10-dedsec-vmware.conf`, `default/hypr/vm.lua`, and the greeter session.
+- `open-vm-tools` rebuilt from Arch's recipe with clipway, `dedsec/pkgs/open-vm-tools-clipway/`: a Wayland clipboard backend for the copy/paste plugin, driven through `wl-copy` and `wl-paste`. Text only, both directions. `omarchy-launch-vmware-user` runs the user daemon inside the session.
+- `omarchy-hw-vmware-display-watch` reloads Hyprland when the VM window is resized, so the guest resolution follows.
+- Shared folders from the VM settings mount at `/mnt/hgfs`.
+
+No `LIBGL_ALWAYS_SOFTWARE` on VMware: mixing a software compositor with the virtual GPU is what wedged it before.
+
+On the host, VMware has to own the CPU. With Hyper-V, WSL2, or core isolation active, Windows' hypervisor is running and VMware falls back to its compatibility mode, which is slow and where 3D acceleration is unreliable. `E:\VMwareOmarchy\HyperVOff.ps1` turns that off (Hyper-V, WSL2, and Docker Desktop pause until `HyperVOn.ps1`), and `E:\VMwareOmarchy\OmarchySetup.ps1` creates the VM with 3D on and 8 GB of graphics memory.
+
+#### VirtualBox and Hyper-V
+
+Neither can give a Wayland session usable hardware GL, so the setup writes `LIBGL_ALWAYS_SOFTWARE=1` to `/etc/environment.d/10-dedsec-vm.conf` and the compositor, the shell, and every app render on the CPU through one path. The greeter is launched with the same flag. `E:\Hyper-VOmarchy\OmarchySetup.ps1` creates a ready-made Hyper-V VM on Windows.
 
 #### Hyper-V Enhanced Session Mode
 
@@ -133,6 +151,8 @@ Started with the session from `default/hypr/autostart.lua` when eww is installed
 | `omarchy-tui-list`, `omarchy-tui-show` | Inspect installed TUI shortcuts |
 | `omarchy-refresh-greeter` | Re-deploy the greeter and greetd session |
 | `omarchy-hw-vm`, `omarchy-hw-vmware`, `omarchy-hw-hyperv` | VM detection helpers |
+| `omarchy-hw-vmware-display-watch` | Reload Hyprland when the VMware window is resized |
+| `omarchy-launch-vmware-user` | VMware user daemon inside the session, for the host clipboard |
 | `omarchy-launch-hyperv-rdp` | Start the Enhanced Session RDP server with the session (no-op elsewhere) |
 | `omarchy-dev-generate-logos` | Regenerate branding assets |
 
@@ -146,7 +166,7 @@ Started with the session from `default/hypr/autostart.lua` when eww is installed
 DedMarchy/
   dedsec.sh               # Bootstrap: clone, dev-link, setup
   dedsec/                 # Setup steps: setup.sh, greetd.sh, eww.sh, vm.sh, vmware.sh, hyperv.sh, blackarch-*.sh
-    pkgs/                 # lamco-rdp-server-vsock PKGBUILD
+    pkgs/                 # hyprland-vmwgfx, open-vm-tools-clipway, lamco-rdp-server-vsock recipes
   bin/                    # Omarchy commands plus the DedSec ones above
   shell/                  # Omarchy 4 Quickshell desktop (unchanged)
   default/
