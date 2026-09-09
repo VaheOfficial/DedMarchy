@@ -9,5 +9,9 @@ config=~/.config/lamco-rdp-server/config.toml
 [[ -f $config ]] || exit 0
 
 # Needs WAYLAND_DISPLAY and HYPRLAND_INSTANCE_SIGNATURE, so it runs from the
-# session (default/hypr/vm.lua), not from a systemd unit.
-exec lamco-rdp-server -c "$config"
+# session (default/hypr/vm.lua), not from a systemd unit. Its stdout goes
+# nowhere useful from there, so the log also goes to a file: one per session,
+# overwritten on the next start.
+log_dir=~/.local/share/lamco-rdp-server
+mkdir -p "$log_dir"
+exec lamco-rdp-server -c "$config" --log-file "$log_dir/lamco-rdp-server.log"
