@@ -12,16 +12,16 @@
 pkgname=open-vm-tools
 epoch=6
 pkgver=13.1.0
-pkgrel=3.3
+pkgrel=3.4
 pkgdesc='The Open Virtual Machine Tools (open-vm-tools) with the clipway Wayland clipboard backend'
 arch=('x86_64')
 url='https://github.com/vmware/open-vm-tools'
 license=('LGPL-2.1-only')
 # The dndcp plugin that carries the clipway clipboard backend is built against
 # gtkmm3, so that is a runtime dependency here rather than optional. 13.1.0's
-# configure looks for gtkmm4 first and has to be told not to: its GTK 4 path
-# pulls in libsigc++ 3, which dropped the signal<R, T...> syntax the plugin's
-# own headers still use.
+# configure picks GTK 4 whenever it is installed (Omarchy ships it) and then
+# only accepts gtkmm4, whose libsigc++ 3 dropped the signal<R, T...> syntax the
+# plugin's own headers still use; --without-gtk4 keeps it on GTK 3 and gtkmm3.
 depends=('fuse3' 'icu' 'iproute2' 'libdnet' 'libmspack' 'libsigc++'
          'libxss' 'lsb-release' 'procps-ng'
          'uriparser' 'which' 'xmlsec' 'wl-clipboard' 'gtkmm3' 'libxtst')
@@ -64,7 +64,7 @@ build() {
     --sysconfdir=/etc \
     --with-udev-rules-dir=/usr/lib/udev/rules.d \
     --without-kernel-modules \
-    --without-gtkmm4
+    --without-gtk4
   make
 }
 
