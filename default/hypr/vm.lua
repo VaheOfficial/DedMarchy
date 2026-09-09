@@ -32,6 +32,12 @@ end
 
 hl.env("LIBGL_ALWAYS_SOFTWARE", "1")
 
+-- Walker and Elephant are user services started before Hyprland exports its
+-- environment, so apps launched from the launcher would miss the flag and hit
+-- the virtual GPU, which wedges it. Push the flag into the session manager and
+-- restart the launcher services so everything they spawn inherits it.
+o.exec_on_start("systemctl --user set-environment LIBGL_ALWAYS_SOFTWARE=1; dbus-update-activation-environment --systemd LIBGL_ALWAYS_SOFTWARE=1; omarchy-restart-walker")
+
 if not vmware then
   return
 end
